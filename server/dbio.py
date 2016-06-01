@@ -7,9 +7,6 @@ def dictFilter( d, keys ):
 def fundDb( client ):
     return client.fund_db;
 
-def fundMetaData( db ):
-    return db.fund_meta_data;
-
 def fundData( db ):
     return db.fund_data;
 
@@ -31,7 +28,9 @@ def fundNav( schemeCode ):
 def fundSchemes():
     client = MongoClient();
     db = fundDb( client );
-    coll = fundMetaData( db );
+    coll = fundData( db );
     client.close();
-    data = coll.find();
-    return( [ scheme for scheme in data ] );
+    schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
+    schemeCols[ constants.MONGO_ID ] = 0;
+    data = coll.find({},schemeCols );
+    return( dict( [ (scheme[constants.SCHEMECODE_KEY],scheme) for scheme in data ] ) );
