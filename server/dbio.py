@@ -33,4 +33,4 @@ def fundSchemes():
     schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
     schemeCols[ constants.MONGO_ID ] = 0;
     data = coll.find({},schemeCols );
-    return( dict( [ (scheme[constants.SCHEMECODE_KEY],scheme) for scheme in data ] ) );
+    return( [ scheme for scheme in data ] );

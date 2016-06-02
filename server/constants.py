@@ -1,3 +1,5 @@
+JSON_KEY = "data";
+
 SCHEMECODE_KEY = "schemeCode";
 NAV_DATES_KEY = "navDates";
 NAV_VALUES_KEY = "nav";
