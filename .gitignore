@@ -1,0 +1,12 @@
+logs/*
+!.gitkeep
+.DS_Store
+.idea
+.git
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+db dump/

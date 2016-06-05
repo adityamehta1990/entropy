@@ -1,0 +1,9 @@
+With a mongod instance, run
+    > python server.py
+in the commandline. 
+
+URLs:
+    1. For nav of a fund: /fund-data/nav/<schemeCode>
+    2. For schemes: /fund-data/schemes
+    3. For return fo a fund: /fund-data/return/<schemeCode>/<window>
+    
