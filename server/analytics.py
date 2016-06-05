@@ -13,7 +13,7 @@ def tsreturn( ts, window ):
     # todo: align to daily
     return( (ts/ts.shift(windowInDays)) - 1 );
 
-def fundReturn( schemeCode, window ):
-    nav = dict2ts( dbio.fundNav( schemeCode ) );
+def fundReturn( client, schemeCode, window ):
+    nav = dict2ts( dbio.fundNav( client, schemeCode ) );
     return ts2dict( tsreturn( nav, window ) );
     
