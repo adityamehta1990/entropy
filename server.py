@@ -27,5 +27,10 @@ def getFundReturn( schemeCode, window ):
 def getFundSchemes():
     return json( dbio.fundSchemes( client ) );
 
+@app.route('/fund-data/scheme/<schemeCode>')
+@crossdomain(origin=origin)
+def getFundScheme( schemeCode ):
+    return json( dbio.fundScheme( client, schemeCode ) );
+
 if __name__ == '__main__':
     app.run();

@@ -20,3 +20,13 @@ def fundSchemes( client ):
     schemeCols[ constants.MONGO_ID ] = 0;
     data = client.fundData( {}, schemeCols );
     return( [ scheme for scheme in data ] );
+
+def fundScheme( client, schemeCode ):
+    schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
+    schemeCols[ constants.MONGO_ID ] = 0;
+    data = client.fundData( { constants.SCHEMECODE_KEY : schemeCode }, schemeCols );
+    if( data.count() == 1 ):
+        data = data[0]
+    else:
+        data = {};
+    return( data );
