@@ -3,6 +3,7 @@ import pandas as pd
 import constants
 
 def ts2dict( ts ):
+    ts = ts.dropna();
     return( { constants.DATES_KEY : list( ts.index ), constants.VALUES_KEY : list( ts.values ) });
 
 def dict2ts( ts ):
