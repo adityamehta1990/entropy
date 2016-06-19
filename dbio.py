@@ -10,7 +10,7 @@ def fundNav( client, schemeCode ):
     if( data.count() == 1 ):
         dates = data[0][ constants.NAV_DATES_KEY ];
         values = [ float( i ) for i in data[0][ constants.NAV_VALUES_KEY ] ];
-        nav = { constants.DATES_KEY : dates, constants.VALUES_KEY : values };
+        nav = { constants.DATES_KEY : [ d.isoformat() for d in dates ], constants.VALUES_KEY : values };
     else:
         nav = { constants.DATES_KEY : [], constants.VALUES_KEY : [] };
     return( nav );

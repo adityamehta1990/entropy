@@ -3,7 +3,7 @@ import pandas as pd
 import constants
 
 def ts2dict( ts ):
-    return( { constants.DATES_KEY : list( ts.index ), constants.VALUES_KEY : list( ts.values ) });
+    return( { constants.DATES_KEY : [ d.isoformat() for d in ts.index ], constants.VALUES_KEY : list( ts.values ) });
 
 def dict2ts( ts ):
     return( pd.Series( ts[ constants.VALUES_KEY ], index=ts[ constants.DATES_KEY ] ) );
