@@ -4,7 +4,6 @@ import constants
 def dictFilter( d, keys ):
     return( {k: v for k, v in d.items() if k in keys } )
 
-# test comment
 # example schemeCode = "101671"
 def fundNav( client, schemeCode ):
     data = client.fundData( { constants.SCHEMECODE_KEY : schemeCode } )
