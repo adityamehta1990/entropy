@@ -33,7 +33,8 @@ def fundScheme( client, schemeCode ):
     return( data );
 
 def portfolioId( clientName, portfolioName ):
-    Id = hashlib.md5( clientName + portfolioName );
+    s = clientName + portfolioName;
+    Id = hashlib.md5( s.encode( 'utf-8' ) );
     return( Id.hexdigest() );
 
 def newTransactionId( transactions ):
@@ -82,4 +83,3 @@ def addTransaction( client, portfolioId, schemeCode, quantity, date ):
     transactionId = newTransactionId( Ts );
     Ts.append( newTransaction( transactionId, schemeCode, quantity, date ) );
     return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS : Ts } ) );
-
