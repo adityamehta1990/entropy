@@ -12,6 +12,7 @@ origin = '*';
 def json( data ):
     return( jsonify( { constants.JSON_KEY : data } ) );
 
+# fund Page
 @app.route('/fund-data/nav/<schemeCode>')
 @crossdomain(origin=origin)
 def getFundNav( schemeCode ):
@@ -31,6 +32,28 @@ def getFundSchemes():
 @crossdomain(origin=origin)
 def getFundScheme( schemeCode ):
     return json( dbio.fundScheme( client, schemeCode ) );
+
+# portfolio Page
+@app.route('/portfolio-data/client/<clientName>')
+@crossdomain(origin=origin)
+def getClientPortfolios( clientName ):
+    return json( dbio.clientPortfolios( client, clientName ) );
+
+@app.route('/portfolio-data/<portfolioId>')
+@crossdomain(origin=origin)
+def getPortfolio( portfolioId ):
+    return json( dbio.portfolioData( client, portfolioId ) );
+
+@app.route('/portfolio-data/<portfolioId>/transactions')
+@crossdomain(origin=origin)
+def getPortfolioTransactions( portfolioId ):
+    return json( dbio.transactions( client, portfolioId ) );
+
+@app.route('/portfolio-data/new',methods=['POST'])
+@crossdomain(origin=origin)
+def addPortfolio():
+    ack = dbio.addPortfolio( request[ constants.CLIENT_NAME ], request[ constants.PORTFOLIO_NAME ] );
+    return ack;
 
 if __name__ == '__main__':
     app.run();

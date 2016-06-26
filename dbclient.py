@@ -3,11 +3,26 @@ from pymongo import MongoClient
 class MClient():
     def __init__( self ):
         client = MongoClient();
-        self.fundDb = client.fund_db;
-        self.fundDataColl = self.fundDb.fund_data;
+        fundDb = client.fund_db;
+        self.fundDataColl = fundDb.fund_data;
+        self.portfolioDataColl = fundDb.portfolio_data;
     
-    def fundData( self, searchCondition, keys={} ):
+    def fundData( self, filterCondition, keys={} ):
         if( len( keys ) == 0 ):
-            return self.fundDataColl.find( searchCondition );
+            return self.fundDataColl.find( filterCondition );
         else:
-            return self.fundDataColl.find( searchCondition, keys );
+            return self.fundDataColl.find( filterCondition, keys );
+        
+    def portfolioData( self, filterCondition, keys={} ):
+        if( len( keys ) == 0 ):
+            return self.portfolioDataColl.find( filterCondition );
+        else:
+            return self.portfolioDataColl.find( filterCondition, keys );
+    
+    def addPortfolio( self, item ):
+        result = self.portfolioDataColl.insert_one( item );     # todo: dateCreated
+        return result.acknowledged;
+        
+    def updatePortfolio( self, filterCondition, item ):
+        result = self.portfolioDataColl.update_one( filterCondition, { "$set" : item } );   # todo: lastUpdated
+        return result.acknowledged;

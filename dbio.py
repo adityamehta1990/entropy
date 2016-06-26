@@ -1,5 +1,6 @@
-from pymongo import MongoClient
 import constants
+import hashlib
+import datetime
 
 def dictFilter( d, keys ):
     return( {k: v for k, v in d.items() if k in keys } )
@@ -30,3 +31,55 @@ def fundScheme( client, schemeCode ):
     else:
         data = {};
     return( data );
+
+def portfolioId( clientName, portfolioName ):
+    Id = hashlib.md5( clientName + portfolioName );
+    return( Id.hexdigest() );
+
+def newTransactionId( transactions ):
+    if len( transactions ) > 0:
+        return max( [ T[ constants.TRANSACTION_ID ] for T in transactions ] ) + 1;
+    else:
+        return 0;
+
+def newPortfolio( Id, clientName, portfolioName ):
+    return( { constants.PORTFOLIO_ID : Id, constants.CLIENT_NAME : clientName, constants.PORTFOLIO_NAME : portfolioName, constants.TRANSACTIONS : [], constants.DATE_CREATED : datetime.datetime.today() } );   # todo: not Local Date!
+
+def newTransaction( Id, schemeCode, quantity, date ):
+    return( { constants.TRANSACTION_ID : Id, constants.ASSET_CODE : schemeCode, constants.QUANTITY : quantity,  constants.DATE : date } );   # todo: price
+
+def addPortfolio( client, clientName, portfolioName ):
+    Id = portfolioId( clientName, portfolioName );
+    data = client.portfolioData( { constants.PORTFOLIO_ID : Id } );
+    if( data.count() > 0 ):
+        return False;
+    return( client.addPortfolio( newPortfolio( Id, clientName, portfolioName ) ) );
+
+def transactions( client, portfolioId ):
+    data = client.portfolioData( { constants.PORTFOLIO_ID : portfolioId } );
+    if( data.count() == 1 ):
+        Ts = data[0][ constants.TRANSACTIONS ]
+    else:
+        Ts = [];
+    return( Ts );
+
+def portfolioData( client, portfolioId ):
+    data = client.portfolioData( { constants.PORTFOLIO_ID : portfolioId }, { constants.MONGO_ID : 0 } );
+    if( data.count() == 1 ):
+        P = data[0]
+    else:
+        P = {};
+    return( P );
+
+def clientPortfolios( client, clientName ):
+    schemeCols = dict( [ (key,1) for key in [ constants.PORTFOLIO_ID, constants.PORTFOLIO_NAME, constants.DATE_CREATED ] ] );
+    schemeCols[ constants.MONGO_ID ] = 0;   # repeated Code
+    data = client.portfolioData( { constants.CLIENT_NAME : clientName }, schemeCols );
+    return( [ scheme for scheme in data ] );
+    
+def addTransaction( client, portfolioId, schemeCode, quantity, date ):
+    Ts = transactions( client, portfolioId );
+    transactionId = newTransactionId( Ts );
+    Ts.append( newTransaction( transactionId, schemeCode, quantity, date ) );
+    return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS : Ts } ) );
+
