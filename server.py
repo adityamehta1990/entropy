@@ -4,8 +4,10 @@ import analytics
 import constants
 import dbclient
 from crossdomain import *
+import utils
 
 app = Flask(__name__);
+app.json_encoder = utils.customJSONEncoder;
 client = dbclient.MClient();
 origin = '*';
 
