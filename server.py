@@ -55,5 +55,7 @@ def addTransaction():
     ack = dbio.addTransaction( client, portfolioId, request[ ASSET_CODE ], request[ TXN_QUANTITY ], request[ TXN_DATE ] );
     return ack;
 
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 if __name__ == '__main__':
     app.run();
