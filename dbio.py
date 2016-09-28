@@ -47,7 +47,7 @@ def newPortfolio( Id, clientName, portfolioName ):
     return( { constants.PORTFOLIO_ID : Id, constants.CLIENT_NAME : clientName, constants.PORTFOLIO_NAME : portfolioName, constants.TRANSACTIONS : [], constants.DATE_CREATED : datetime.datetime.today() } );   # todo: not Local Date!
 
 def newTransaction( Id, schemeCode, quantity, date ):
-    return( { constants.TRANSACTION_ID : Id, constants.ASSET_CODE : schemeCode, constants.QUANTITY : quantity,  constants.DATE : date } );   # todo: price
+    return( { constants.TRANSACTION_ID : Id, constants.ASSET_CODE : schemeCode, constants.TXN_QUANTITY : quantity,  constants.TXN_DATE : date } );   # todo: price
 
 def addPortfolio( client, clientName, portfolioName ):
     Id = portfolioId( clientName, portfolioName );
