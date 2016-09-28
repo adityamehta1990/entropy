@@ -1,19 +1,16 @@
-from flask import Flask, jsonify
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
 import dbio
 import analytics
 import constants
 import dbclient
-from flask_cors import CORS, cross_origin
-import utils
+from utils import *
 
 app = Flask(__name__);
-app.json_encoder = utils.customJSONEncoder;
+app.json_encoder = customJSONEncoder;
 client = dbclient.MClient();
 CORS(app)
 origin = '*';
-
-def json( data ):
-    return( jsonify( { constants.JSON_KEY : data } ) );
 
 # fund Page
 @app.route('/fund-data/nav/<schemeCode>')
@@ -48,14 +45,23 @@ def getPortfolioTransactions( portfolioId ):
 @app.route('/portfolio-data/new',methods=['POST'])
 def addPortfolio():
     ack = dbio.addPortfolio( client, request[ constants.CLIENT_NAME ], request[ constants.PORTFOLIO_NAME ] );
-    return ack;
+    return json( ack );
 
 @app.route('/portfolio-data/<portfolioId>/transaction/new',methods=['POST'])
-def addTransaction():
-    ack = dbio.addTransaction( client, portfolioId, request[ ASSET_CODE ], request[ TXN_QUANTITY ], request[ TXN_DATE ] );
-    return ack;
+def addTransaction( portfolioId ):
+    data = request.get_json();
+    ack = dbio.addTransaction( client, portfolioId, data[ constants.ASSET_CODE ],
+        data[ constants.TXN_QUANTITY ], dateParser( data[ constants.TXN_DATE ] ) );
+    return json( ack );
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
+@app.before_request
+def log_request_info():
+    print('\nMETHOD: ', request.method);
+    print('HEADERS: ', request.headers);
+    print('DATA: ', request.get_json(), '\n');
+
+# instead of return json( data ) everywhere, add a after_request to process in one place
 
 if __name__ == '__main__':
     app.run();
