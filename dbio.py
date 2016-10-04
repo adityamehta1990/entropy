@@ -11,15 +11,20 @@ def fundNav( client, schemeCode ):
     if( data.count() == 1 ):
         dates = data[0][ constants.NAV_DATES_KEY ];
         values = [ float( i ) for i in data[0][ constants.NAV_VALUES_KEY ] ];
-        nav = { constants.DATES_KEY : [ d.isoformat() for d in dates ], constants.VALUES_KEY : values };
+        nav = { constants.DATES_KEY : [ d for d in dates ], constants.VALUES_KEY : values };
     else:
         nav = { constants.DATES_KEY : [], constants.VALUES_KEY : [] };
     return( nav );
 
-def fundSchemes( client ):
+# pass in navDate to get schemes with NAV on that date
+def fundSchemes( client, navDate=None ):
     schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
     schemeCols[ constants.MONGO_ID ] = 0;
-    data = client.fundData( {}, schemeCols );
+    filterCols = {}
+    if navDate is not None:
+        filterCols[ constants.NAV_DATES_KEY ] = navDate
+    # some day we should also be able to return nav for given navDate
+    data = client.fundData( filterCols, schemeCols );
     return( [ scheme for scheme in data ] );
 
 def fundScheme( client, schemeCode ):

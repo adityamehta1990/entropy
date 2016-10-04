@@ -6,11 +6,13 @@ import constants
 import dbclient
 from utils import *
 
+# init app
 app = Flask(__name__);
-app.json_encoder = customJSONEncoder;
-client = dbclient.MClient();
+app.json_encoder = customJSONEncoder; # centralized formatter for dates
 CORS(app)
-origin = '*';
+
+# init db
+client = dbclient.MClient()
 
 # fund Page
 @app.route('/fund-data/nav/<schemeCode>')
@@ -24,6 +26,10 @@ def getFundReturn( schemeCode, window ):
 @app.route('/fund-data/schemes')
 def getFundSchemes():
     return json( dbio.fundSchemes( client ) );
+
+@app.route('/fund-data/schemes/<navDate>')
+def getFundSchemesForDate( navDate ):
+    return json( dbio.fundSchemes( client, dateParser( navDate ) ) );
 
 @app.route('/fund-data/scheme/<schemeCode>')
 def getFundScheme( schemeCode ):
