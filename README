@@ -4,6 +4,5 @@ in the commandline.
 
 URLs:
     1. For nav of a fund: /fund-data/nav/<schemeCode>
-    2. For schemes: /fund-data/schemes
+    2. For schemes: /fund-data/schemes or /fund-data/schemes/<navDate>
     3. For return fo a fund: /fund-data/return/<schemeCode>/<window>
-    
