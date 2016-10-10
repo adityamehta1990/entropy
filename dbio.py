@@ -1,6 +1,7 @@
 import constants
 import hashlib
 import datetime
+from utils import ist
 
 def dictFilter( d, keys ):
     return( {k: v for k, v in d.items() if k in keys } )
@@ -49,10 +50,24 @@ def newTransactionId( transactions ):
         return 0;
 
 def newPortfolio( Id, clientName, portfolioName ):
-    return( { constants.PORTFOLIO_ID : Id, constants.CLIENT_NAME : clientName, constants.PORTFOLIO_NAME : portfolioName, constants.TRANSACTIONS : [], constants.DATE_CREATED : datetime.datetime.today() } );   # todo: not Local Date!
+    now = ist.localize(datetime.datetime.today())
+    return( {
+        constants.PORTFOLIO_ID : Id,
+        constants.CLIENT_NAME : clientName,
+        constants.PORTFOLIO_NAME : portfolioName,
+        constants.TRANSACTIONS : [],
+        constants.DATE_CREATED : now
+    } );
 
-def newTransaction( Id, schemeCode, quantity, date ):
-    return( { constants.TRANSACTION_ID : Id, constants.ASSET_CODE : schemeCode, constants.TXN_QUANTITY : quantity,  constants.TXN_DATE : date } );   # todo: price
+def newTransaction( Id, schemeCode, schemeName, cashflow, quantity, date ):
+    return( {
+        constants.TRANSACTION_ID : Id,
+        constants.ASSET_CODE : schemeCode,
+        constants.ASSET_NAME : schemeName,
+        constants.TXN_CASHFLOW : cashflow,
+        constants.TXN_QUANTITY : quantity,
+        constants.TXN_DATE : date
+    } )
 
 def addPortfolio( client, clientName, portfolioName ):
     Id = portfolioId( clientName, portfolioName );
@@ -83,8 +98,12 @@ def clientPortfolios( client, clientName ):
     data = client.portfolioData( { constants.CLIENT_NAME : clientName }, schemeCols );
     return( [ scheme for scheme in data ] );
     
-def addTransaction( client, portfolioId, schemeCode, quantity, date ):
+def addTransaction( client, portfolioId, schemeCode, schemeName, cashflow, quantity, date ):
     Ts = transactions( client, portfolioId );
     transactionId = newTransactionId( Ts );
-    Ts.append( newTransaction( transactionId, schemeCode, quantity, date ) );
+    Ts.append( newTransaction( transactionId, schemeCode, schemeName, cashflow, quantity, date ) );
     return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS : Ts } ) );
+
+def removeTransaction( client, portfolioId, transactionId ):
+    Ts = [ txn for txn in transactions( client, portfolioId ) if txn.get(constants.TRANSACTION_ID) != transactionId ]
+    return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS: Ts } ) )

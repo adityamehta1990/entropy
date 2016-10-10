@@ -24,6 +24,8 @@ DATE_CREATED = "dateCreated";
 # transactions
 TRANSACTION_ID = "transactionId";
 ASSET_CODE = SCHEMECODE_KEY;
+ASSET_NAME = "schemeName"
+TXN_CASHFLOW = "cashflow"
 TXN_QUANTITY = "quantity";
 TXN_PRICE = "price";
 TXN_DATE = "date";

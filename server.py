@@ -57,9 +57,16 @@ def addPortfolio():
 @app.route('/portfolio-data/<portfolioId>/transaction/new',methods=['POST'])
 def addTransaction( portfolioId ):
     data = request.get_json();
-    ack = dbio.addTransaction( client, portfolioId, data[ constants.ASSET_CODE ],
-        data[ constants.TXN_QUANTITY ], utils.dateParser( data[ constants.TXN_DATE ] ) );
+    ack = dbio.addTransaction( client, portfolioId, data[ constants.ASSET_CODE ], data[ constants.ASSET_NAME ],
+        data[ constants.TXN_CASHFLOW ], data[ constants.TXN_QUANTITY ], utils.dateParser( data[ constants.TXN_DATE ] ) );
     return json( ack )
+
+@app.route('/portfolio-data/<portfolioId>/transaction/<transactionId>',methods=['DELETE'])
+def removeTransaction( portfolioId, transactionId ):
+    # todo: add elif for PUT (Modify)
+    if request.method == 'DELETE':
+        ack = dbio.removeTransaction( client, portfolioId, int(transactionId) )
+        return( json( ack ) )
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 @app.before_request
