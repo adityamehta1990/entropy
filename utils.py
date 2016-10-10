@@ -3,7 +3,11 @@ from flask.json import JSONEncoder
 import calendar
 from datetime import datetime
 from dateutil.parser import parse
+from pytz import timezone
+import pytz
 import constants
+
+ist = timezone('Asia/Kolkata')
 
 # parse ISO date string to datetime
 def dateParser(dateStr):
@@ -18,7 +22,9 @@ class customJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
             if isinstance(obj, datetime):
-                serial = obj.isoformat()
+                # python does not really conform to ISO 8601
+                # it is not tz aware unless the TZ is explicitly set
+                serial = ist.localize(obj).isoformat()
                 return serial
             iterable = iter(obj)
         except TypeError:

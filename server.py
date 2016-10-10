@@ -4,11 +4,12 @@ import dbio
 import analytics
 import constants
 import dbclient
-from utils import *
+from utils import json
+import utils
 
 # init app
 app = Flask(__name__);
-app.json_encoder = customJSONEncoder; # centralized formatter for dates
+app.json_encoder = utils.customJSONEncoder # centralized formatter for dates
 CORS(app)
 
 # init db
@@ -17,48 +18,48 @@ client = dbclient.MClient()
 # fund Page
 @app.route('/fund-data/nav/<schemeCode>')
 def getFundNav( schemeCode ):
-    return json( dbio.fundNav( client, schemeCode ) );
+    return json( dbio.fundNav( client, schemeCode ) )
 
 @app.route('/fund-data/return/<schemeCode>/<window>')
 def getFundReturn( schemeCode, window ):
-    return json( analytics.fundReturn( client, schemeCode, window ) );
+    return json( analytics.fundReturn( client, schemeCode, window ) )
 
 @app.route('/fund-data/schemes')
 def getFundSchemes():
-    return json( dbio.fundSchemes( client ) );
+    return json( dbio.fundSchemes( client ) )
 
 @app.route('/fund-data/schemes/<navDate>')
 def getFundSchemesForDate( navDate ):
-    return json( dbio.fundSchemes( client, dateParser( navDate ) ) );
+    return json( dbio.fundSchemes( client, utils.dateParser( navDate ) ) )
 
 @app.route('/fund-data/scheme/<schemeCode>')
 def getFundScheme( schemeCode ):
-    return json( dbio.fundScheme( client, schemeCode ) );
+    return json( dbio.fundScheme( client, schemeCode ) )
 
 # portfolio Page
 @app.route('/portfolio-data/client/<clientName>')
 def getClientPortfolios( clientName ):
-    return json( dbio.clientPortfolios( client, clientName ) );
+    return json( dbio.clientPortfolios( client, clientName ) )
 
 @app.route('/portfolio-data/<portfolioId>')
 def getPortfolio( portfolioId ):
-    return json( dbio.portfolioData( client, portfolioId ) );
+    return json( dbio.portfolioData( client, portfolioId ) )
 
 @app.route('/portfolio-data/<portfolioId>/transactions')
 def getPortfolioTransactions( portfolioId ):
-    return json( dbio.transactions( client, portfolioId ) );
+    return json( dbio.transactions( client, portfolioId ) )
 
 @app.route('/portfolio-data/new',methods=['POST'])
 def addPortfolio():
     ack = dbio.addPortfolio( client, request[ constants.CLIENT_NAME ], request[ constants.PORTFOLIO_NAME ] );
-    return json( ack );
+    return json( ack )
 
 @app.route('/portfolio-data/<portfolioId>/transaction/new',methods=['POST'])
 def addTransaction( portfolioId ):
     data = request.get_json();
     ack = dbio.addTransaction( client, portfolioId, data[ constants.ASSET_CODE ],
-        data[ constants.TXN_QUANTITY ], dateParser( data[ constants.TXN_DATE ] ) );
-    return json( ack );
+        data[ constants.TXN_QUANTITY ], utils.dateParser( data[ constants.TXN_DATE ] ) );
+    return json( ack )
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 @app.before_request
