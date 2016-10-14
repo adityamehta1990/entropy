@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from pytz import timezone
 import pytz
 import constants
+import pandas as pd
 
 ist = timezone('Asia/Kolkata')
 
@@ -14,7 +15,14 @@ def dateParser(dateStr):
     return parse(dateStr);
 
 def json( data ):
-    return( jsonify( { constants.JSON_KEY : data } ) );
+    return( jsonify( { constants.JSON_KEY : data } ) )
+
+def ts2dict( ts ):
+    ts = ts.dropna();
+    return( { constants.DATES_KEY : list( ts.index ), constants.VALUES_KEY : list( ts.values ) });
+
+def dict2ts( dict ):
+    return( pd.Series( dict[ constants.VALUES_KEY ], index=dict[ constants.DATES_KEY ] ) );
 
 # set this on the flask.json_encoder to encode dates in isoformat
 class customJSONEncoder(JSONEncoder):

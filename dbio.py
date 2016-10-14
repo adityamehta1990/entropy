@@ -3,20 +3,6 @@ import hashlib
 import datetime
 from utils import ist
 
-def dictFilter( d, keys ):
-    return( {k: v for k, v in d.items() if k in keys } )
-
-# example schemeCode = "101671"
-def fundNav( client, schemeCode ):
-    data = client.fundData( { constants.SCHEMECODE_KEY : schemeCode } )
-    if( data.count() == 1 ):
-        dates = data[0][ constants.NAV_DATES_KEY ];
-        values = [ float( i ) for i in data[0][ constants.NAV_VALUES_KEY ] ];
-        nav = { constants.DATES_KEY : [ d for d in dates ], constants.VALUES_KEY : values };
-    else:
-        nav = { constants.DATES_KEY : [], constants.VALUES_KEY : [] };
-    return( nav );
-
 # pass in navDate to get schemes with NAV on that date
 def fundSchemes( client, navDate=None ):
     schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
@@ -27,16 +13,6 @@ def fundSchemes( client, navDate=None ):
     # some day we should also be able to return nav for given navDate
     data = client.fundData( filterCols, schemeCols );
     return( [ scheme for scheme in data ] );
-
-def fundScheme( client, schemeCode ):
-    schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
-    schemeCols[ constants.MONGO_ID ] = 0;
-    data = client.fundData( { constants.SCHEMECODE_KEY : schemeCode }, schemeCols );
-    if( data.count() == 1 ):
-        data = data[0]
-    else:
-        data = {};
-    return( data );
 
 def portfolioId( clientName, portfolioName ):
     s = clientName + portfolioName;
