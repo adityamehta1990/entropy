@@ -52,22 +52,6 @@ def addPortfolio( client, clientName, portfolioName ):
         return False;
     return( client.addPortfolio( newPortfolio( Id, clientName, portfolioName ) ) );
 
-def transactions( client, portfolioId ):
-    data = client.portfolioData( { constants.PORTFOLIO_ID : portfolioId } );
-    if( data.count() == 1 ):
-        Ts = data[0][ constants.TRANSACTIONS ]
-    else:
-        Ts = [];
-    return( Ts );
-
-def portfolioData( client, portfolioId ):
-    data = client.portfolioData( { constants.PORTFOLIO_ID : portfolioId }, { constants.MONGO_ID : 0 } );
-    if( data.count() == 1 ):
-        P = data[0]
-    else:
-        P = {};
-    return( P );
-
 def clientPortfolios( client, clientName ):
     schemeCols = dict( [ (key,1) for key in [ constants.PORTFOLIO_ID, constants.PORTFOLIO_NAME, constants.DATE_CREATED ] ] );
     schemeCols[ constants.MONGO_ID ] = 0;   # repeated Code

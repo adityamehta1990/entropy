@@ -4,6 +4,7 @@ import dbclient
 import constants
 from utils import json
 import utils
+from portfolio import Portfolio
 
 portfolio_api = Blueprint('portfolio_api',__name__)
 client = dbclient.MClient()
@@ -14,11 +15,11 @@ def getClientPortfolios( clientName ):
 
 @portfolio_api.route('/<portfolioId>')
 def getPortfolio( portfolioId ):
-    return json( dbio.portfolioData( client, portfolioId ) )
+    return json( Portfolio( portfolioId, client ).portfolioData() )
 
 @portfolio_api.route('/<portfolioId>/transactions')
 def getPortfolioTransactions( portfolioId ):
-    return json( dbio.transactions( client, portfolioId ) )
+    return json( Portfolio( portfolioId, client ).transactions() )
 
 @portfolio_api.route('/new',methods=['POST'])
 def addPortfolio():
@@ -38,3 +39,11 @@ def removeTransaction( portfolioId, transactionId ):
     if request.method == 'DELETE':
         ack = dbio.removeTransaction( client, portfolioId, int(transactionId) )
         return( json( ack ) )
+
+@portfolio_api.route('/<portfolioId>/nav')
+def portfolioNav( portfolioId ):
+    return( json( utils.ts2dict( Portfolio( portfolioId, client ).nav() ) ) )
+
+@portfolio_api.route('/<portfolioId>/return/<window>')
+def portfolioReturn( portfolioId, window ):
+    return( json( utils.ts2dict( Portfolio( portfolioId, client ).rollingReturn( window ) ) ) )
