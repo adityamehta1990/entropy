@@ -12,7 +12,11 @@ class MClient():
             return self.fundDataColl.find( filterCondition );
         else:
             return self.fundDataColl.find( filterCondition, keys );
-        
+    
+    def updateFundData( self, filterCondition, item ):
+        result = self.fundDataColl.update_one( filterCondition, { "$set" : item } )
+        return result.acknowledged
+
     def portfolioData( self, filterCondition, keys={} ):
         if( len( keys ) == 0 ):
             return self.portfolioDataColl.find( filterCondition );

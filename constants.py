@@ -2,17 +2,11 @@
 JSON_KEY = "data";
 
 # db constants
-SCHEMECODE_KEY = "schemeCode";
-NAV_DATES_KEY = "navDates";
-NAV_VALUES_KEY = "nav";
 MONGO_ID = "_id";
 
 # db <-> pandas
 DATES_KEY = "dates";
 VALUES_KEY = "values";
-
-# fund-data
-SCHEME_ATTRIBUTES = [ "schemeName", "schemeCode", "schemeType", "fundName" ];
 
 # portfolio
 CLIENT_NAME = "clientName";
@@ -23,7 +17,7 @@ DATE_CREATED = "dateCreated";
 
 # transactions
 TRANSACTION_ID = "transactionId";
-ASSET_CODE = SCHEMECODE_KEY;
+ASSET_CODE = 'schemeCode';
 ASSET_NAME = "schemeName"
 TXN_CASHFLOW = "cashflow"
 TXN_QUANTITY = "quantity";

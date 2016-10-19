@@ -2,17 +2,26 @@ import constants
 import hashlib
 import datetime
 from utils import ist
+import fund
 
 # pass in navDate to get schemes with NAV on that date
 def fundSchemes( client, navDate=None ):
-    schemeCols = dict( [ (key,1) for key in constants.SCHEME_ATTRIBUTES ] );
+    schemeCols = dict( [ (key,1) for key in fund.SCHEME_ATTRIBUTES ] );
     schemeCols[ constants.MONGO_ID ] = 0;
     filterCols = {}
     if navDate is not None:
-        filterCols[ constants.NAV_DATES_KEY ] = navDate
+        filterCols[ fund.NAV_DATES_KEY ] = navDate
     # some day we should also be able to return nav for given navDate
     data = client.fundData( filterCols, schemeCols );
     return( [ scheme for scheme in data ] );
+
+def updateFundInfo( client, schemeCode, fundInfo ):
+    # check what got passed in from fundInfo
+    wrongKeys = [ key for key in fundInfo.keys() if key not in fund.SCHEME_ATTRIBUTES_CALC ]
+    if len(wrongKeys):
+        raise '{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys))
+    # now store
+    return( client.updateFundData( { fund.SCHEME_CODE_KEY : schemeCode }, fundInfo ) )
 
 def portfolioId( clientName, portfolioName ):
     s = clientName + portfolioName;
