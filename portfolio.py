@@ -16,7 +16,7 @@ class Portfolio(Investment):
         self.client=client
 
     def portfolioData(self):
-        data = self.client.portfolioData( { constants.PORTFOLIO_ID : self.portfolioId }, { constants.MONGO_ID : 0, constants.TRANSACTIONS : 0 } );
+        data = self.client.portfolioData( { constants.PORTFOLIO_ID : self.portfolioId }, { constants.TRANSACTIONS : 0 } );
         if( data.count() == 1 ):
             P = data[0]
         else:

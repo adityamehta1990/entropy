@@ -1,13 +1,3 @@
-# get requests
-JSON_KEY = "data";
-
-# db constants
-MONGO_ID = "_id";
-
-# db <-> pandas
-DATES_KEY = "dates";
-VALUES_KEY = "values";
-
 # portfolio
 CLIENT_NAME = "clientName";
 PORTFOLIO_ID = "portfolioId";

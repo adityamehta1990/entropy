@@ -7,7 +7,6 @@ import fund
 # pass in navDate to get schemes with NAV on that date
 def fundSchemes( client, navDate=None ):
     schemeCols = dict( [ (key,1) for key in fund.SCHEME_ATTRIBUTES ] );
-    schemeCols[ constants.MONGO_ID ] = 0;
     filterCols = {}
     if navDate is not None:
         filterCols[ fund.NAV_DATES_KEY ] = navDate
@@ -15,6 +14,7 @@ def fundSchemes( client, navDate=None ):
     data = client.fundData( filterCols, schemeCols );
     return( [ scheme for scheme in data ] );
 
+# fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo( client, schemeCode, fundInfo ):
     # check what got passed in from fundInfo
     wrongKeys = [ key for key in fundInfo.keys() if key not in fund.SCHEME_ATTRIBUTES_CALC ]
@@ -63,7 +63,6 @@ def addPortfolio( client, clientName, portfolioName ):
 
 def clientPortfolios( client, clientName ):
     schemeCols = dict( [ (key,1) for key in [ constants.PORTFOLIO_ID, constants.PORTFOLIO_NAME, constants.DATE_CREATED ] ] );
-    schemeCols[ constants.MONGO_ID ] = 0;   # repeated Code
     data = client.portfolioData( { constants.CLIENT_NAME : clientName }, schemeCols );
     return( [ scheme for scheme in data ] );
     

@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 
+MONGO_ID = "_id"
+
 class MClient():
     def __init__( self ):
         client = MongoClient();
@@ -8,20 +10,16 @@ class MClient():
         self.portfolioDataColl = fundDb.portfolio_data;
     
     def fundData( self, filterCondition, keys={} ):
-        if( len( keys ) == 0 ):
-            return self.fundDataColl.find( filterCondition );
-        else:
-            return self.fundDataColl.find( filterCondition, keys );
+        keys[ MONGO_ID ] = 0 # we never care about mongo id
+        return self.fundDataColl.find( filterCondition, keys )
     
     def updateFundData( self, filterCondition, item ):
         result = self.fundDataColl.update_one( filterCondition, { "$set" : item } )
         return result.acknowledged
 
     def portfolioData( self, filterCondition, keys={} ):
-        if( len( keys ) == 0 ):
-            return self.portfolioDataColl.find( filterCondition );
-        else:
-            return self.portfolioDataColl.find( filterCondition, keys );
+        keys[ MONGO_ID ] = 0
+        return self.portfolioDataColl.find( filterCondition, keys )
     
     def addPortfolio( self, item ):
         result = self.portfolioDataColl.insert_one( item );     # todo: dateCreated

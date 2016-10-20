@@ -1,28 +1,32 @@
 from flask import jsonify
 from flask.json import JSONEncoder
-import calendar
 from datetime import datetime
 from dateutil.parser import parse
 from pytz import timezone
-import pytz
-import constants
 import pandas as pd
+
+# all http responses will be of the form {data : <>}
+JSON_KEY = "data"
+
+# ts2dict and dict2ts
+VALUES_KEY = "values"
+DATES_KEY = "dates"
 
 ist = timezone('Asia/Kolkata')
 
 # parse ISO date string to datetime
 def dateParser(dateStr):
-    return parse(dateStr);
+    return parse(dateStr)
 
 def json( data ):
-    return( jsonify( { constants.JSON_KEY : data } ) )
+    return( jsonify( { JSON_KEY : data } ) )
 
 def ts2dict( ts ):
-    ts = ts.dropna();
-    return( { constants.DATES_KEY : list( ts.index ), constants.VALUES_KEY : list( ts.values ) });
+    ts = ts.dropna()
+    return( { DATES_KEY : list( ts.index ), VALUES_KEY : list( ts.values ) })
 
 def dict2ts( dict ):
-    return( pd.Series( dict[ constants.VALUES_KEY ], index=dict[ constants.DATES_KEY ] ) );
+    return( pd.Series( dict[ VALUES_KEY ], index=dict[ DATES_KEY ] ) )
 
 # set this on the flask.json_encoder to encode dates in isoformat
 class customJSONEncoder(JSONEncoder):

@@ -35,7 +35,6 @@ class Fund(Investment):
 
     def schemeInfo( self ):
         schemeCols = dict( [ (key,1) for key in SCHEME_ATTRIBUTES ] );
-        schemeCols[ constants.MONGO_ID ] = 0;
         data = self.client.fundData( { SCHEME_CODE_KEY : self.schemeCode }, schemeCols );
         if( data.count() == 1 ):
             data = data[0]
