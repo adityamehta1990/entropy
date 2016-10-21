@@ -33,6 +33,11 @@ class Fund(Investment):
             nav = pd.Series( [], [] )
         return( nav )
 
+    # can implement dividend into this
+    # for now, cashflow for fund is empty
+    def cashflow(self):
+        return pd.Series([],[])
+
     def schemeInfo( self ):
         schemeCols = dict( [ (key,1) for key in SCHEME_ATTRIBUTES ] );
         data = self.client.fundData( { SCHEME_CODE_KEY : self.schemeCode }, schemeCols );

@@ -1,8 +1,11 @@
 import dbclient
 import constants
+import datetime
 import pandas as pd
 from fund import Fund
 from investment import Investment
+
+# todo : replace all strings with constants
 
 class Portfolio(Investment):
     portfolioId=None
@@ -31,18 +34,26 @@ class Portfolio(Investment):
             Ts = []
         return( Ts )
     
-    def nav(self):
+    def aggregateTxns(self):
         txns = pd.DataFrame( self.transactions() )
-        aggregateTxns = txns.groupby(by=['date','schemeCode']).agg({'cashflow':sum,'quantity':sum})
-        aggregateTxns = aggregateTxns.reset_index().set_index('date')
-        aggregateTxns['cum_quantity'] = aggregateTxns.quantity.cumsum()
-        qty = aggregateTxns.pivot(columns='schemeCode',values='cum_quantity')
+        # first aggregate qty and cf by date+schemeCode to handle multiple txns on a date
+        aggTxns = txns.groupby(by=['date','schemeCode']).agg({'cashflow':sum,'quantity':sum})
+        cumAggTxns = aggTxns.groupby(level='schemeCode').cumsum().rename(columns={'cashflow':'cum_cashflow','quantity':'cum_quantity'})
+        # concat cum by index and reset to date index
+        return pd.concat([aggTxns,cumAggTxns],axis=1).reset_index(level='schemeCode')
 
-        # get all fund navs to avoid dup calls to db
-        schemeCodes = aggregateTxns.schemeCode.unique()
-        nav = pd.Series([],[])
-        for schemeCode in schemeCodes:
+    def nav(self):
+        aggTxns = self.aggregateTxns()
+        qty = aggTxns.pivot(columns='schemeCode',values='cum_quantity')
+        # generate empty nav curve from first txn to today
+        index = pd.DatetimeIndex( freq='D',start=qty.first_valid_index(),end=datetime.datetime.today() )
+        nav = pd.Series(index=index).fillna(0)
+        for (schemeCode,schemeQty) in qty.iteritems():
             schemeNav = Fund(schemeCode,self.client).nav()
-            nav = nav.add(qty.get(schemeCode).reindex(schemeNav.index,method='pad') * schemeNav,fill_value=0)
-        
+            # dont fillna here, if fund nav is missing, it should yield NaN
+            nav = nav.add(schemeQty.reindex(schemeNav.index,method='pad') * schemeNav)
         return(nav.dropna())
+    
+    def cashflow(self):
+        aggTxns = self.aggregateTxns()
+        return pd.Series(aggTxns.groupby(level='date').sum().cum_cashflow)
