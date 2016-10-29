@@ -42,18 +42,29 @@ class Portfolio(Investment):
         # concat cum by index and reset to date index
         return pd.concat([aggTxns,cumAggTxns],axis=1).reset_index(level='schemeCode')
 
-    def nav(self):
+    # actual market value of portfolio        
+    def marketValue(self):
         aggTxns = self.aggregateTxns()
         qty = aggTxns.pivot(columns='schemeCode',values='cum_quantity')
-        # generate empty nav curve from first txn to today
+        # generate empty mv curve from first txn to today
         index = pd.DatetimeIndex( freq='D',start=qty.first_valid_index(),end=datetime.datetime.today() )
-        nav = pd.Series(index=index).fillna(0)
+        mv = pd.Series(index=index).fillna(0)
+        qty = qty.reindex(index=index,method='pad').fillna(0)
         for (schemeCode,schemeQty) in qty.iteritems():
             schemeNav = Fund(schemeCode,self.client).nav()
             # dont fillna here, if fund nav is missing, it should yield NaN
-            nav = nav.add(schemeQty.reindex(schemeNav.index,method='pad') * schemeNav)
-        return(nav.dropna())
+            mv = mv.add(schemeQty * schemeNav)
+        return(mv.dropna())
     
+    # portfolio value if you had invested one rupee at the start
+    # and received the same returns. basically compounded at TWRR
+    def nav(self):
+        mv = self.marketValue()
+        ts = mv - self.cashflow().reindex(mv.index).fillna(0)
+        # only first value will be NaN because of the shift
+        return ( ts / mv.shift(1) ).fillna(1).cumprod()
+
+    # todo: add options for groupby, cumulative and send back to FE
     def cashflow(self):
         aggTxns = self.aggregateTxns()
-        return pd.Series(aggTxns.groupby(level='date').sum().cum_cashflow)
+        return pd.Series(aggTxns.groupby(level='date').sum().cashflow)
