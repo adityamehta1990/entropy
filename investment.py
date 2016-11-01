@@ -5,7 +5,6 @@ import pandas as pd
 # base class for any type of investment - portfolio, fund, etc
 # this can implement common analytics for returns and risk
 
-# make this abstract
 class Investment(metaclass=ABCMeta):
     @abstractmethod
     # this should not include cashflow
@@ -18,28 +17,30 @@ class Investment(metaclass=ABCMeta):
     
     # daily return curve, optionally adjusted by cashflows
     def returns(self):
-        nav = self.nav().resample('D').pad()
-        return analytics.rollingReturn(nav,'1d')
+        return analytics.rollingReturn(self.nav(),'1D')
     
-    # todo: can add total returns for dividends (cashflow)
+    # optional: can add total returns for dividends (cashflow)
 
-    # YTD, MTD, 1y, 3y, SI
-    # todo: make this analytics which takes either period or days and computes from NAV
+    # YTD, MTD, 1y, 3y, SI etc
     def returnStats(self):
-        returns = self.returns() + 1
+        returns = self.returns()
         return {
-            'MTD': returns.last('MS').cumprod().values[-1] - 1,
-            'QTD': returns.last('QS').cumprod().values[-1] - 1,
-            'YTD': returns.last('AS').cumprod().values[-1] - 1,
-            'SI': returns.cumprod().values[-1] - 1
-            #'1Y': returns.last('1y').cumprod().values[-1] - 1,
-            #'3Y': returns.last('AS').cumprod().values[-1] - 1,
-            #'5Y': returns.last('AS').cumprod().values[-1] - 1
+            'MTD': analytics.cumReturn( returns.last('M') ),
+            'QTD': analytics.cumReturn( returns.last('Q') ),
+            'YTD': analytics.cumReturn( returns.last('A') ),
+            'SI': analytics.cumReturn(returns),
+            '1Y': analytics.periodReturn(returns,'1Y'),
+            '3Y': analytics.periodReturn(returns,'3Y'),
+            '5Y': analytics.periodReturn(returns,'5Y')
         }
-
-    # todo: monthly and annual returns, internal rate of return
+    
+    # monthly/yearly returns
+    def calendarPeriodReturns(self,type='month'):
+        ret = self.returns()
+        return analytics.calendarPeriodReturns(ret,type)
+    
+    # todo: internal rate of return
 
     # rolling return curve
-    def rollingReturn(self,window='1d'):
-        nav = self.nav().resample('D').pad()
-        return analytics.rollingReturn(nav,window)
+    def rollingReturn(self,window='1D'):
+        return analytics.rollingReturn(self.nav(),window)
