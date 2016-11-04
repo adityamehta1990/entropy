@@ -17,7 +17,7 @@ class Investment(metaclass=ABCMeta):
     
     # daily return curve, optionally adjusted by cashflows
     def returns(self):
-        return analytics.rollingReturn(self.nav(),'1D')
+        return analytics.rollingReturn(self.nav(),'1D').fillna(0)
     
     # optional: can add total returns for dividends (cashflow)
 
@@ -43,4 +43,4 @@ class Investment(metaclass=ABCMeta):
 
     # rolling return curve
     def rollingReturn(self,window='1D'):
-        return analytics.rollingReturn(self.nav(),window)
+        return analytics.rollingReturn(self.nav(),window).dropna()

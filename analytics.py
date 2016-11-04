@@ -31,7 +31,7 @@ def rollingReturn(nav,window):
     (freq,periods) = parseWindow( window )
     windowInDays = PERIOD_TO_DAYS[ freq ] * periods
     nav = nav.resample('D').pad() # ensure curve is daily by padding with last value
-    return( nav.pct_change(windowInDays).fillna(0) ) # fill first return with zero
+    return nav.pct_change(windowInDays) # leave NAs as is
 
 # t in years (>=1)
 def annualize(ret,t):
