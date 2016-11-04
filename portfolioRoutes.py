@@ -47,3 +47,7 @@ def portfolioNav( portfolioId ):
 @portfolio_api.route('/<portfolioId>/return/<window>')
 def portfolioReturn( portfolioId, window ):
     return( json( utils.ts2dict( Portfolio( portfolioId, client ).rollingReturn( window ) ) ) )
+
+@portfolio_api.route('/<portfolioId>/return-stats')
+def portfolioReturnStats( portfolioId ):
+    return( json( Portfolio( portfolioId, client ).returnStats() ) )

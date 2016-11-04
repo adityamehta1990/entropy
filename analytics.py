@@ -53,7 +53,7 @@ def periodReturn(returns,window):
     (freq,periods) = parseWindow(window)
     numDays = PERIOD_TO_DAYS[freq] * periods
     if returns.size < numDays:
-        return np.nan
+        return None
     ret = cumReturn( returns.tail(numDays) )
     return ret
 
