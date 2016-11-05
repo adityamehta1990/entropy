@@ -67,11 +67,11 @@ def clientPortfolios( client, clientName ):
     return( [ scheme for scheme in data ] );
     
 def addTransaction( client, portfolioId, schemeCode, schemeName, cashflow, quantity, date ):
-    Ts = transactions( client, portfolioId );
-    transactionId = newTransactionId( Ts );
+    Ts = Portfolio(portfolioId,client).transactions()
+    transactionId = newTransactionId( Ts )
     Ts.append( newTransaction( transactionId, schemeCode, schemeName, cashflow, quantity, date ) );
     return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS : Ts } ) );
 
 def removeTransaction( client, portfolioId, transactionId ):
-    Ts = [ txn for txn in transactions( client, portfolioId ) if txn.get(constants.TRANSACTION_ID) != transactionId ]
+    Ts = [ txn for txn in Portfolio(portfolioId,client).transactions() if txn.get(constants.TRANSACTION_ID) != transactionId ]
     return( client.updatePortfolio( { constants.PORTFOLIO_ID : portfolioId }, { constants.TRANSACTIONS: Ts } ) )
