@@ -45,11 +45,12 @@ class Portfolio(Investment):
     # actual market value of portfolio        
     def marketValue(self):
         aggTxns = self.aggregateTxns()
-        qty = aggTxns.pivot(columns='schemeCode',values='cum_quantity')
+        # front fill by padding so that there are only leading NAs
+        qty = aggTxns.pivot(columns='schemeCode',values='cum_quantity').fillna(method='pad')
         # generate empty mv curve from first txn to today
         index = pd.DatetimeIndex( freq='D',start=qty.first_valid_index(),end=datetime.datetime.today() )
         mv = pd.Series(index=index).fillna(0)
-        qty = qty.reindex(index=index,method='pad').fillna(0)
+        qty = qty.reindex(index=index,method='pad').fillna(0) # now fillna zero for initial period
         for (schemeCode,schemeQty) in qty.iteritems():
             schemeNav = Fund(schemeCode,self.client).nav()
             # dont fillna here, if fund nav is missing, it should yield NaN
