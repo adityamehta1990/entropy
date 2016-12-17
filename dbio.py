@@ -1,6 +1,7 @@
 import constants
 import hashlib
 import datetime
+from portfolio import Portfolio
 from utils import ist
 import fund
 
@@ -17,9 +18,11 @@ def fundSchemes( client, navDate=None ):
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo( client, schemeCode, fundInfo ):
     # check what got passed in from fundInfo
-    wrongKeys = [ key for key in fundInfo.keys() if key not in fund.SCHEME_ATTRIBUTES_CALC ]
+    wrongKeys = [ key for key in fundInfo.keys() if key not in fund.SCHEME_ATTRIBUTES_INPUT ]
     if len(wrongKeys):
-        raise '{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys))
+        raise Exception( '{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)) )
+    if fundInfo['assetClass'].lower() == 'equity':
+        pass
     # now store
     return( client.updateFundData( { fund.SCHEME_CODE_KEY : schemeCode }, fundInfo ) )
 

@@ -5,9 +5,29 @@ import pandas as pd
 import re
 
 # we get raw data from amfi, which can be parsed to enrich meta data about a fund
-SCHEME_ATTRIBUTES_RAW = [ "schemeName", "schemeCode", "schemeType", "managerName" ]
-SCHEME_ATTRIBUTES_CALC = [ "fundName", "isOpenEnded", "hasDividend", "dividendPeriod", "isDirect" ]
-SCHEME_ATTRIBUTES = SCHEME_ATTRIBUTES_RAW + SCHEME_ATTRIBUTES_CALC
+
+# should not edit these attrs
+SCHEME_ATTRIBUTES_RAW = ['schemeName', 'schemeCode', 'schemeType', 'managerName']
+# derived from raw
+SCHEME_ATTRIBUTES_CALC = ['fundName', 'isOpenEnded', 'hasDividend', 'dividendPeriod', 'isDirect']
+# attrs input from tool because they are not raw or cannot be derived
+SCHEME_ATTRIBUTES_CLASSIFICATION = {
+    'assetClass' : ['equity', 'debt', 'hybrid']
+    #'strategy': # large cap/long term/liquid
+}
+SCHEME_ATTRIBUTES_EQUITY = {
+    'marketCap' : ['large', 'medium', 'small'],
+    'investmentStyle' : ['value', 'growth', 'blend'],
+    'sector' : ['multi'] # multi if no sector
+}
+SCHEME_ATTRIBUTES_DEBT = {
+    'duration' : ['short', 'medium', 'long'],
+    'creditQuality' :  ['high', 'medium', 'low'],
+    'underlier' : ['gilt', 'corp', 'liquid']
+}
+SCHEME_ATTRIBUTES_INPUT = SCHEME_ATTRIBUTES_CALC + list(SCHEME_ATTRIBUTES_CLASSIFICATION.keys()) + \
+                    list( SCHEME_ATTRIBUTES_EQUITY.keys() ) + list( SCHEME_ATTRIBUTES_DEBT.keys() )
+SCHEME_ATTRIBUTES = SCHEME_ATTRIBUTES_RAW + SCHEME_ATTRIBUTES_INPUT
 
 SCHEME_CODE_KEY = 'schemeCode'
 NAV_DATES_KEY = 'navDates'
