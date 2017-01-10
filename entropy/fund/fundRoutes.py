@@ -1,9 +1,8 @@
 from flask import Blueprint
-import dbio
-import dbclient
-from utils import json
-import utils
-from fund import Fund
+from entropy.db import dbio, dbclient
+from entropy.utils.utils import json
+import entropy.utils.utils as utils
+from entropy.fund.fund import Fund
 
 fund_api = Blueprint('fund_api',__name__)
 client = dbclient.MClient()

@@ -1,9 +1,9 @@
-import dbclient
-import constants
+from entropy.db import dbclient
+import entropy.constants as constants
 import datetime
 import pandas as pd
-from fund import Fund
-from investment import Investment
+from entropy.fund.fund import Fund
+from entropy.investment import Investment
 
 # todo : replace all strings with constants
 

@@ -1,5 +1,5 @@
 from abc import ABCMeta,abstractmethod
-import analytics
+from entropy import analytics
 import pandas as pd
 
 # base class for any type of investment - portfolio, fund, etc

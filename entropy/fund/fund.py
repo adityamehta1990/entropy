@@ -1,6 +1,5 @@
-from investment import Investment
-import dbclient
-import constants
+from entropy.investment import Investment
+import entropy.db.dbclient
 import pandas as pd
 import re
 

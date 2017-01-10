@@ -1,8 +1,8 @@
 from flask import Flask, request
 from flask_cors import CORS
-import utils
-from fundRoutes import fund_api
-from portfolioRoutes import portfolio_api
+from entropy.utils import utils
+from entropy.fund.fundRoutes import fund_api
+from entropy.portfolio.portfolioRoutes import portfolio_api
 
 # init app
 app = Flask(__name__)
@@ -27,4 +27,4 @@ app.register_blueprint(fund_api,url_prefix='/fund-data')
 app.register_blueprint(portfolio_api,url_prefix='/portfolio-data')
 
 if __name__ == '__main__':
-    app.run();
+    app.run()
