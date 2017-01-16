@@ -4,16 +4,19 @@ import datetime
 from entropy.portfolio.portfolio import Portfolio
 from entropy.utils.utils import ist
 from entropy.fund import fund
+from entropy.fund import fundData
+
+MONGO_ID = "_id"
 
 # pass in navDate to get schemes with NAV on that date
 def fundSchemes(client, navDate=None):
-    schemeCols = dict( [ (key,1) for key in fund.SCHEME_ATTRIBUTES ] );
+    schemeCols = dict([ (key,1) for key in fundData.FUND_ATTRIBUTES ])
     filterCols = {}
     if navDate is not None:
-        filterCols[ fund.NAV_DATES_KEY ] = navDate
+        client.valueData()
     # some day we should also be able to return nav for given navDate
-    data = client.fundData( filterCols, schemeCols );
-    return( [ scheme for scheme in data ] );
+    data = client.fundData(filterCols, schemeCols)
+    return( [ scheme for scheme in data ] )
 
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo(client, schemeCode, fundInfo):
@@ -25,6 +28,15 @@ def updateFundInfo(client, schemeCode, fundInfo):
         pass
     # now store
     return( client.updateFundData( { fund.SCHEME_CODE_KEY : schemeCode }, fundInfo ) )
+
+# merge and override fund NAV for date
+def updateFundNAV(client, dt, valueMap):
+    fundCodeMap = client.fundData({}, {fundData.FUND_CODE_AMFI:1}, hideMongoId=False)
+    newValueMap = {}
+    for fund in fundCodeMap:
+        if valueMap.get(fund[fundData.FUND_CODE_AMFI]) is not None:
+            newValueMap[str(fund[MONGO_ID])] = valueMap[fund[fundData.FUND_CODE_AMFI]]
+    return client.updateValueData(dt, dict(newValueMap))
 
 def portfolioId(clientName, portfolioName):
     s = clientName + portfolioName;
