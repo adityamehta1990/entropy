@@ -1,10 +1,10 @@
 from entropy.investment import Investment
+from entropy.fund import fundData
 import entropy.db.dbclient
 import pandas as pd
 import re
 
-# we get raw data from amfi, which can be parsed to enrich meta data about a fund
-
+# todo: move these to fundData/fundio
 # should not edit these attrs
 SCHEME_ATTRIBUTES_RAW = ['schemeName', 'schemeCode', 'schemeType', 'managerName']
 # derived from raw
@@ -35,22 +35,15 @@ SCHEME_RETURN_OPTION_IDENTIFIERS = ['GROWTH','DIVIDEND']
 SCHEME_INVESTMENT_OPTION_IDENTIFIERS = ['DIRECT','REGULAR']
 
 class Fund(Investment):
-    schemeCode=None # example schemeCode = "101671"
+    idStr=None # MONGO_ID for this fund
     client=None # db client
 
-    def __init__(self,schemeCode,client):
-        self.schemeCode = schemeCode
+    def __init__(self,idStr,client):
         self.client = client
+        self._id = self._id
 
     def nav( self ):
-        data = self.client.fundData( { SCHEME_CODE_KEY : self.schemeCode } )
-        if( data.count() == 1 ):
-            dates = data[0][ NAV_DATES_KEY ]
-            values = [ float( i ) for i in data[0][ NAV_VALUES_KEY ] ]
-            nav = pd.Series( values, dates ).sort_index()
-        else:
-            nav = pd.Series( [], [] )
-        return( nav )
+        return fundData.fundNAV(self.client, self._id)
 
     # can implement dividend into this
     # for now, cashflow for fund is empty
@@ -58,13 +51,7 @@ class Fund(Investment):
         return pd.Series([],[])
 
     def schemeInfo( self ):
-        schemeCols = dict( [ (key,1) for key in SCHEME_ATTRIBUTES ] );
-        data = self.client.fundData( { SCHEME_CODE_KEY : self.schemeCode }, schemeCols );
-        if( data.count() == 1 ):
-            data = data[0]
-        else:
-            data = {}
-        return( data )
+        return fundData.fundInfo(self.client, self._id)
 
     # only enrich missing data
     def enrichedSchemeInfo( self ):

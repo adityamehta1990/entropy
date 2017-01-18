@@ -13,23 +13,21 @@ class MClient():
         self.portfolioDataColl = db.portfolio_data
         self.valueDataColl = db.value_data
 
-    def fundData(self, filterCondition, keys={}, hideMongoId=True):
-        if hideMongoId:
-            keys[MONGO_ID] = 0
+    def fundData(self, filterCondition, keys={}):
         return self.fundDataColl.find(filterCondition, keys)
 
     def updateFundData(self, filterCondition, item):
         result = self.fundDataColl.update_one(filterCondition, {"$set" : item}, upsert=True)
         return result.acknowledged
 
-    def valueDataOnDate(self,dt):
+    def valueDataOnDate(self, dt):
         val = self.valueDataColl.find({"valueDate":dt}, {MONGO_ID:0})
         if len(val) != 1:
             raise "Could not find valuation data on given date"
         return val
 
-    def valueDataById(self, id):
-        return self.valueDataColl.find({}, {id: 1})
+    def valueDataById(self, _id):
+        return self.valueDataColl.find({}, {"valueDate": 1, str(_id): 1, MONGO_ID:0})
 
     def updateValueData(self, dt, valueMap):
         valueMap["valueDate"] = datetime.datetime(dt.year,dt.month,dt.day) # todo: define mkt close
