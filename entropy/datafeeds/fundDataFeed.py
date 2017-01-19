@@ -2,7 +2,6 @@ import re
 import requests
 import datetime
 from entropy.fund import fundData
-from entropy.db import dbio
 from entropy.utils import utils
 
 AMFI_DAILY_NAV_URL = 'http://portal.amfiindia.com/spages/NAV0.txt'
@@ -66,7 +65,7 @@ def fundDataFromAMFI():
 def updateDailyFundNAV(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
     valueMap = fundNAVFromAMFI(dt)
-    ack = dbio.updateFundNAV(client, dt, valueMap)
+    ack = fundData.updateFundNAV(client, dt, valueMap)
     return ack
 
 # this is a one time thing
@@ -78,6 +77,6 @@ def updateHistFundNAV(client):
     ack = True
     while dt.date() != utils.dateParser('2006-04-01'):
         valueMap = fundNAVFromAMFI(dt)
-        ack = dbio.updateFundNAV(client, dt, valueMap) and ack
+        ack = fundData.updateFundNAV(client, dt, valueMap) and ack
         dt = dt - datetime.timedelta(days=1)
     return ack

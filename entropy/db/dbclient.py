@@ -22,9 +22,11 @@ class MClient():
 
     def valueDataOnDate(self, dt):
         val = self.valueDataColl.find({"valueDate":dt}, {MONGO_ID:0})
-        if len(val) != 1:
-            raise "Could not find valuation data on given date"
-        return val
+        if val.count() == 0:
+            return {}
+        elif val.count() > 1:
+            raise "Found duplicate valuations for date: {}".format(dt.isoformat())
+        return val[0]
 
     def valueDataById(self, _id):
         return self.valueDataColl.find({}, {"valueDate": 1, str(_id): 1, MONGO_ID:0})

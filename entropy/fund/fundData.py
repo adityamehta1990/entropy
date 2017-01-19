@@ -39,6 +39,14 @@ FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE]
 FUND_ATTRIBUTES_CALC = [FUND_NAME,]
 FUND_ATTRIBUTES = FUND_ATTRIBUTES_AMFI + FUND_ATTRIBUTES_CALC
 
+def fundList(client, navDate=None):
+    keys = dict([(key,1) for key in FUND_ATTRIBUTES])
+    funds = [f for f in client.fundData({}, keys)]
+    if navDate is not None:
+        vals = client.valueDataOnDate(navDate)
+        funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
+    return funds
+
 def fundInfo(client, _id):
     keys = dict([(key,1) for key in FUND_ATTRIBUTES])
     data = client.fundData({dbclient.MONGO_ID: _id}, keys)
@@ -48,6 +56,15 @@ def fundInfo(client, _id):
         data = {}
     return( data )
 
+# fundInfo can be passed back from website or can be "enriched"
+def updateFundInfo(client, _id, fundInfo):
+    # check what got passed in from fundInfo
+    wrongKeys = [ key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES ]
+    if len(wrongKeys):
+        raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
+    # now store
+    return( client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo))
+
 def fundNAV(client, _id):
     data = [v for v in client.valueDataById(_id)]
     idStr = str(_id)
@@ -55,3 +72,12 @@ def fundNAV(client, _id):
     dates = [v["valueDate"] for v in data]
     nav = pd.Series(values, dates)
     return nav.dropna().sort_index()
+
+# merge and override fund NAV for date
+def updateFundNAV(client, dt, valueMap):
+    fundCodeMap = client.fundData({}, {FUND_CODE_AMFI:1})
+    newValueMap = {}
+    for fund in fundCodeMap:
+        if valueMap.get(fund[FUND_CODE_AMFI]) is not None:
+            newValueMap[str(fund[dbclient.MONGO_ID])] = valueMap[fund[FUND_CODE_AMFI]]
+    return client.updateValueData(dt, dict(newValueMap))
