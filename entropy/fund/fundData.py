@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 from entropy.db import dbclient
 # define schema, possible values, etc
 
@@ -35,8 +36,20 @@ FUND_ATTRIBUTES_DEBT = {
     'underlier' : ['gilt', 'corp', 'liquid']
 }
 
+FUND_RETURN_OPTIONS = ['growth', 'dividend']
+FUND_INVESTMENT_OPTIONS = ['direct', 'regular']
+
+IS_OPEN_ENDED = 'isOpenEnded'
+HAS_DIVIDEND = 'hasDividend'
+DIVIDEND_PERIOD = 'hasDividend'
+IS_DIRECT = 'isDirect'
+
 FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE]
-FUND_ATTRIBUTES_CALC = [FUND_NAME,]
+FUND_ATTRIBUTES_CALC = [FUND_NAME, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
+FUND_ATTRIBUTES_INPUT = list(FUND_CLASSIFICATION.keys()) + \
+                        list(FUND_ATTRIBUTES_EQUITY.keys()) + \
+                        list(FUND_ATTRIBUTES_DEBT.keys)
+
 FUND_ATTRIBUTES = FUND_ATTRIBUTES_AMFI + FUND_ATTRIBUTES_CALC
 
 def fundList(client, navDate=None):
@@ -54,7 +67,7 @@ def fundInfo(client, _id):
         data = data[0]
     else:
         data = {}
-    return( data )
+    return data
 
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo(client, _id, fundInfo):
@@ -63,7 +76,7 @@ def updateFundInfo(client, _id, fundInfo):
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     # now store
-    return( client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo))
+    return client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo)
 
 def fundNAV(client, _id):
     data = [v for v in client.valueDataById(_id)]
@@ -81,3 +94,20 @@ def updateFundNAV(client, dt, valueMap):
         if valueMap.get(fund[FUND_CODE_AMFI]) is not None:
             newValueMap[str(fund[dbclient.MONGO_ID])] = valueMap[fund[FUND_CODE_AMFI]]
     return client.updateValueData(dt, dict(newValueMap))
+
+# only enrich missing data
+def enrichedFundInfo(client, _id):
+    info = fundInfo(client, _id)
+    enrichedInfo = {}
+    nameParts = [part.strip() for part in info[FUND_NAME_AMFI].split('-')]
+    # amfi info based enrichment logic
+    if not info.get(FUND_NAME):
+        pattern = re.compile('|'.join(FUND_RETURN_OPTIONS + FUND_INVESTMENT_OPTIONS), re.IGNORECASE)
+        enrichedInfo[FUND_NAME] = '-'.join(filter(lambda x: not pattern.search(x), nameParts))
+    if not info.get(IS_OPEN_ENDED):
+        enrichedInfo[IS_OPEN_ENDED] = re.compile('open ended scheme',re.IGNORECASE).search(info[FUND_TYPE]) is not None
+    if not info.get(IS_DIRECT):
+        enrichedInfo[IS_DIRECT] = re.compile('direct',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+    if not info.get(HAS_DIVIDEND):
+        enrichedInfo[HAS_DIVIDEND] = re.compile('dividend',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+    return enrichedInfo

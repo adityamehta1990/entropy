@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask import request
 from entropy.db import dbclient
 from entropy.utils import utils
 from entropy.fund.fund import Fund
@@ -16,9 +17,18 @@ def getFundList():
 def getFundListOnDate(navDate):
     return utils.json(fundData.fundList(client, utils.dateParser(navDate)))
 
-@fund_api.route('/fund/<_id>')
-def getFundScheme(_id):
+@fund_api.route('/fund/<_id>', methods=['GET'])
+def getFundInfo(_id):
     return utils.json(Fund(_id,client).fundInfo())
+
+@fund_api.route('/enriched/<_id>')
+def enrichedFundInfo(_id):
+    return utils.json(fundData.enrichedFundInfo(client, _id))
+
+@fund_api.route('/fund/<_id>', methods=['POST'])
+def updateFundInfo(_id):
+    fundInfo = request.get_json()
+    return utils.json(fundData.updateFundInfo(client, _id, fundInfo))
 
 @fund_api.route('/nav/<_id>')
 def getFundNav(_id):
