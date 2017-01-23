@@ -12,7 +12,9 @@ JSON_KEY = "data"
 VALUES_KEY = "values"
 DATES_KEY = "dates"
 
-ist = timezone('Asia/Kolkata')
+def localizeToIST(dt):
+    ist = timezone('Asia/Kolkata')
+    return ist.localize(dt)
 
 # parse ISO date string to datetime
 def dateParser(dateStr):
@@ -36,7 +38,7 @@ class customJSONEncoder(JSONEncoder):
             if isinstance(obj, datetime):
                 # python does not really conform to ISO 8601
                 # it is not tz aware unless the TZ is explicitly set
-                serial = ist.localize(obj).isoformat()
+                serial = localizeToIST(obj).isoformat()
                 return serial
             iterable = iter(obj)
         except TypeError:
