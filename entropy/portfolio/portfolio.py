@@ -2,12 +2,13 @@ import datetime
 import pandas as pd
 from entropy.fund import fundData
 from entropy.fund.fund import Fund
-from entropy.investment import Investment
+from entropy.asset import Asset
+from entropy.compositeAsset import CompositeAsset
 from entropy.portfolio import portfolioData
 
 # todo : replace all strings with constants
 
-class Portfolio(Investment):
+class Portfolio(Asset, CompositeAsset):
     portfolioId=None
     client=None
 
@@ -72,4 +73,4 @@ class Portfolio(Investment):
     # todo: add options for groupby, cumulative and send back to FE
     def cashflow(self):
         aggTxns = self.aggregateTxns()
-        return pd.Series(aggTxns.groupby(level='date').sum().cashflow)
+        return pd.Series(aggTxns.groupby(level=portfolioData.TXN_DATE).sum().cashflow)

@@ -1,10 +1,11 @@
-from entropy.investment import Investment
+from entropy.asset import Asset
+from entropy.compositeAsset import CompositeAsset
 from entropy.fund import fundData
 from bson.objectid import ObjectId
 import pandas as pd
 import re
 
-class Fund(Investment):
+class Fund(Asset, CompositeAsset):
     idStr = None # string rep of MONGO_ID for this fund
     _id = None # MONGO_ID for this fund
     client = None # db client
