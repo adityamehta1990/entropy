@@ -1,11 +1,12 @@
 from abc import ABCMeta,abstractmethod
 from entropy import analytics
 import pandas as pd
+import six
 
 # base class for any type of investment - portfolio, fund, etc
 # this can implement common analytics for returns and risk
-
-class Investment(metaclass=ABCMeta):
+@six.add_metaclass(ABCMeta)
+class Investment():
     @abstractmethod
     # this should not include cashflow
     def nav(self):

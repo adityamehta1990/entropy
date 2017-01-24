@@ -32,7 +32,7 @@ def fundNAVFromAMFI(dt=datetime.datetime.today() - datetime.timedelta(days=1)):
     # potentially use schema = data[0].split(';') to figure out below indexes
     # schemeCodeIdx = 0
     # NAVIdx = 4
-    valueMap = [(line[0], float(line[4])) for line in data if line[4] != 'N.A.']
+    valueMap = [(line[0], float(line[4].replace(',',''))) for line in data if line[4] != 'N.A.']
     return dict(valueMap)
 
 # todo: write fund class and data to make sure parsed data conforms
@@ -69,14 +69,16 @@ def updateDailyFundNAV(client):
     return ack
 
 # this is a one time thing
-def updateHistFundNAV(client):
+# amfi has data from 1st Apr 2006
+def updateHistFundNAV(client,startDate=utils.dateParser('20060401')):
     # todo: check min updated date and use that
     # this will just refill everything
-    dt = datetime.datetime.today() - datetime.timedelta(days=2)
-    # amfi has data from 1st Apr 2006
+    dt  = datetime.datetime.today() - datetime.timedelta(days=2)    
     ack = True
-    while dt.date() != utils.dateParser('2006-04-01'):
+    while dt.date() != startDate:
         valueMap = fundNAVFromAMFI(dt)
         ack = fundData.updateFundNAV(client, dt, valueMap) and ack
+        if( ack ):
+            print("Update successful for %s"%(dt.date()))
         dt = dt - datetime.timedelta(days=1)
     return ack
