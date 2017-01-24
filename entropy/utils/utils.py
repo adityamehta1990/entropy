@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask.json import JSONEncoder
 from datetime import datetime
+from bson.objectid import ObjectId
 from dateutil.parser import parse
 from pytz import timezone
 import pandas as pd
@@ -39,6 +40,9 @@ class customJSONEncoder(JSONEncoder):
                 # python does not really conform to ISO 8601
                 # it is not tz aware unless the TZ is explicitly set
                 serial = localizeToIST(obj).isoformat()
+                return serial
+            elif isinstance(obj, ObjectId):
+                serial = str(obj)
                 return serial
             iterable = iter(obj)
         except TypeError:
