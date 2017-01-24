@@ -16,7 +16,6 @@ FUND_TYPE_CHOICES = ["open ended", "close ended", "interval"]
 
 ASSET_CLASS = "assetClass"
 STRATEGY_TYPE = "strategyType" # this is a short hand for investment attributes
-INVESTMENT_ATTRIBUTES = "investmentAttributes"
 
 FUND_CLASSIFICATION = {
     ASSET_CLASS : ['equity', 'debt', 'hybrid'],
@@ -48,12 +47,12 @@ FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE]
 FUND_ATTRIBUTES_CALC = [FUND_NAME, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
 FUND_ATTRIBUTES_INPUT = list(FUND_CLASSIFICATION.keys()) + \
                         list(FUND_ATTRIBUTES_EQUITY.keys()) + \
-                        list(FUND_ATTRIBUTES_DEBT.keys)
+                        list(FUND_ATTRIBUTES_DEBT.keys())
 
 FUND_ATTRIBUTES = FUND_ATTRIBUTES_AMFI + FUND_ATTRIBUTES_CALC
 
 def fundList(client, navDate=None):
-    keys = dict([(key,1) for key in FUND_ATTRIBUTES])
+    keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
     funds = [f for f in client.fundData({}, keys)]
     if navDate is not None:
         vals = client.valueDataOnDate(navDate)
@@ -61,9 +60,9 @@ def fundList(client, navDate=None):
     return funds
 
 def fundInfo(client, _id):
-    keys = dict([(key,1) for key in FUND_ATTRIBUTES])
+    keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
     data = client.fundData({dbclient.MONGO_ID: _id}, keys)
-    if( data.count() == 1 ):
+    if(data.count() == 1):
         data = data[0]
     else:
         data = {}
@@ -72,7 +71,7 @@ def fundInfo(client, _id):
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo(client, _id, fundInfo):
     # check what got passed in from fundInfo
-    wrongKeys = [ key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES ]
+    wrongKeys = [key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES]
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     # now store
@@ -105,9 +104,9 @@ def enrichedFundInfo(client, _id):
         pattern = re.compile('|'.join(FUND_RETURN_OPTIONS + FUND_INVESTMENT_OPTIONS), re.IGNORECASE)
         enrichedInfo[FUND_NAME] = '-'.join(filter(lambda x: not pattern.search(x), nameParts))
     if not info.get(IS_OPEN_ENDED):
-        enrichedInfo[IS_OPEN_ENDED] = re.compile('open ended scheme',re.IGNORECASE).search(info[FUND_TYPE]) is not None
+        enrichedInfo[IS_OPEN_ENDED] = re.compile('open ended scheme', re.IGNORECASE).search(info[FUND_TYPE]) is not None
     if not info.get(IS_DIRECT):
-        enrichedInfo[IS_DIRECT] = re.compile('direct',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+        enrichedInfo[IS_DIRECT] = re.compile('direct', re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
     if not info.get(HAS_DIVIDEND):
-        enrichedInfo[HAS_DIVIDEND] = re.compile('dividend',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+        enrichedInfo[HAS_DIVIDEND] = re.compile('dividend', re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
     return enrichedInfo
