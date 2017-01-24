@@ -35,11 +35,11 @@ def addTransaction(portfolioId):
         data[portfolioData.TXN_QUANTITY], utils.dateParser(data[portfolioData.TXN_DATE]))
     return utils.json(ack)
 
-@portfolio_api.route('/<portfolioId>/transaction/<transactionId>',methods=['DELETE'])
+@portfolio_api.route('/<portfolioId>/transaction/<transactionId>', methods=['DELETE'])
 def removeTransaction(portfolioId, transactionId):
     # todo: add elif for PUT (Modify)
     if request.method == 'DELETE':
-        ack = dbio.removeTransaction(client, portfolioId, int(transactionId))
+        ack = portfolioData.removeTransaction(client, portfolioId, int(transactionId))
         return utils.json(ack)
 
 @portfolio_api.route('/<portfolioId>/nav')
