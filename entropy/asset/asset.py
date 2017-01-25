@@ -1,20 +1,27 @@
 from abc import ABCMeta
 from abc import abstractmethod
-from entropy import analytics
 import pandas as pd
+from entropy import analytics
+from entropy.asset import assetData
 
 # base class for any type of asset/investment - fund, stock, bond
 # this can implement returns and risk based analytics
 
-ASSET_ATTRIBUTES = ['assetType', 'assetClass']
-
 class Asset(metaclass=ABCMeta):
+    # every asset must have the following:
+    client = None
+    _id = None
+    idStr = None
     isCompositeAsset = False
 
-    @abstractmethod
-    # this should not include cashflow
+    # values for base assets are stored not derived
     def nav(self):
-        pass
+        data = [v for v in assetData.valuesById(self.client, self._id)]
+        idStr = str(self._id)
+        values = [v.get(idStr) for v in data]
+        dates = [v[assetData.VALUE_DATE] for v in data]
+        nav = pd.Series(values, dates)
+        return nav.dropna().sort_index()
 
     @abstractmethod
     def cashflow(self):
