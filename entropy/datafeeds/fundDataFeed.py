@@ -55,7 +55,8 @@ def fundDataFromAMFI():
                 fundData.FUND_HOUSE : currFundHouse,
                 fundData.FUND_TYPE : currFundType,
                 fundData.FUND_CODE_AMFI : parts[0],
-                fundData.FUND_NAME_AMFI : parts[3]
+                fundData.FUND_NAME_AMFI : parts[3],
+                fundData.ISIN : parts[1]
             })
         else:
             currFundHouse = line

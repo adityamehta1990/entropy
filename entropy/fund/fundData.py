@@ -14,6 +14,7 @@ FUND_HOUSE = "fundHouse"
 FUND_TYPE = "fundType"
 FUND_TYPE_CHOICES = ["open ended", "close ended", "interval"]
 
+ISIN = "ISIN"
 ASSET_CLASS = "assetClass"
 STRATEGY_TYPE = "strategyType" # this is a short hand for investment attributes
 
@@ -43,7 +44,7 @@ HAS_DIVIDEND = 'hasDividend'
 DIVIDEND_PERIOD = 'hasDividend'
 IS_DIRECT = 'isDirect'
 
-FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE]
+FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE, ISIN]
 FUND_ATTRIBUTES_CALC = [FUND_NAME, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
 FUND_ATTRIBUTES_INPUT = list(FUND_CLASSIFICATION.keys()) + \
                         list(FUND_ATTRIBUTES_EQUITY.keys()) + \
