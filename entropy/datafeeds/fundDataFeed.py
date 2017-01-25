@@ -66,7 +66,7 @@ def fundDataFromAMFI():
 def updateDailyFundNAV(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
     valueMap = fundNAVFromAMFI(dt)
-    ack = fundData.updateFundNAV(client, dt, valueMap)
+    ack = fundData.updateFundNAVOnDate(client, dt, valueMap)
     return ack
 
 # this is a one time thing
@@ -78,6 +78,6 @@ def updateHistFundNAV(client):
     ack = True
     while dt.date() != utils.dateParser('2006-04-01'):
         valueMap = fundNAVFromAMFI(dt)
-        ack = fundData.updateFundNAV(client, dt, valueMap) and ack
+        ack = fundData.updateFundNAVOnDate(client, dt, valueMap) and ack
         dt = dt - datetime.timedelta(days=1)
     return ack

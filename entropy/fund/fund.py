@@ -1,11 +1,10 @@
-from entropy.asset import Asset
-from entropy.compositeAsset import CompositeAsset
+from entropy.asset.compositeAsset import CompositeAsset
 from entropy.fund import fundData
 from bson.objectid import ObjectId
 import pandas as pd
 import re
 
-class Fund(Asset, CompositeAsset):
+class Fund(CompositeAsset):
     idStr = None # string rep of MONGO_ID for this fund
     _id = None # MONGO_ID for this fund
     client = None # db client
@@ -18,7 +17,7 @@ class Fund(Asset, CompositeAsset):
         self._id = ObjectId(idStr)
 
     def nav(self):
-        return fundData.fundNAV(self.client, self.idStr)
+        return super(Fund, self).nav()
 
     # can implement dividend into this
     # for now, cashflow for fund is empty

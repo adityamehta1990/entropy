@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from entropy.db import dbclient
+from entropy.asset import assetData
 # define schema, possible values, etc
 
 # todo: rename to fundio and move fund stuff from dbio here
@@ -78,22 +79,14 @@ def updateFundInfo(client, _id, fundInfo):
     # now store
     return client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo)
 
-def fundNAV(client, _id):
-    data = [v for v in client.valueDataById(_id)]
-    idStr = str(_id)
-    values = [v.get(idStr) for v in data]
-    dates = [v["valueDate"] for v in data]
-    nav = pd.Series(values, dates)
-    return nav.dropna().sort_index()
-
-# merge and override fund NAV for date
-def updateFundNAV(client, dt, valueMap):
+# map values from amfi codes to internal IDs and update for given date
+def updateFundNAVOnDate(client, dt, valueMap):
     fundCodeMap = client.fundData({}, {FUND_CODE_AMFI:1})
     newValueMap = {}
     for fund in fundCodeMap:
         if valueMap.get(fund[FUND_CODE_AMFI]) is not None:
             newValueMap[str(fund[dbclient.MONGO_ID])] = valueMap[fund[FUND_CODE_AMFI]]
-    return client.updateValueData(dt, dict(newValueMap))
+    return assetData.updateValueDataOnDate(client, dt, dict(newValueMap))
 
 # only enrich missing data
 def enrichedFundInfo(client, _id):
