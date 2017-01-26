@@ -6,6 +6,8 @@ from dateutil.parser import parse
 from pytz import timezone
 import pandas as pd
 
+# todo: Compartmentalize this into different scripts
+
 # all http responses will be of the form {data : <>}
 JSON_KEY = "data"
 
@@ -13,17 +15,39 @@ JSON_KEY = "data"
 VALUES_KEY = "values"
 DATES_KEY = "dates"
 
+# market close hour
+MARKET_CLOSE_HOUR = 14
+
 def localizeToIST(dt):
     ist = timezone('Asia/Kolkata')
     return ist.localize(dt)
 
 def addToDate(date,deltaInDays):
     return date + datetime.timedelta(days=deltaInDays)
-    
+    return date + datetime.timedelta(days=deltaInDays)
+
 # parse ISO date string to datetime
 def dateParser(dateStr):
     return parse(dateStr)
 
+def marketCloseFromDate(dt):
+    return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR);
+
+# todo: implement
+def dailyClose(df):
+    pass
+
+# todo: implement
+def dailySum(df):
+    pass
+
+# regular week dates
+def periodicDates(startDate,endDate=datetime.today()):
+    start = marketCloseFromDate(startDate)
+    end = marketCloseFromDate(endDate)
+    dates = pd.DatetimeIndex(freq='D', start=start, end=end)
+    return [ d for d in dates if d.weekday() < 5 ] # Num Weekday: Monday = 0, Sunday = 6
+    
 def json( data ):
     return( jsonify( { JSON_KEY : data } ) )
 

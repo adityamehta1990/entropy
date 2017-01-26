@@ -3,12 +3,12 @@ import pandas as pd
 from entropy.fund import fundData
 from entropy.fund.fund import Fund
 import constants
-from entropy.asset import Asset
-from entropy.compositeAsset import CompositeAsset
+from entropy.asset.asset import Asset
+from entropy.asset.compositeAsset import CompositeAsset
 
 # todo : replace all strings with constants
 
-class Portfolio(Asset, CompositeAsset):
+class Portfolio(CompositeAsset):
     portfolioId=None
     client=None
 
@@ -36,6 +36,9 @@ class Portfolio(Asset, CompositeAsset):
     # this is really holdings/investments
     def aggregateTxns(self):
         txns = pd.DataFrame(self.transactions())
+        cf = txns.pivot(columns=constants.ASSET_CODE, values=constants.TXN_CASHFLOW, index=constants.TXN_DATE)
+        quantity = txns.pivot(columns=constants.ASSET_CODE, values=constants.TXN_QUANTITY, index=constants.TXN_DATE)
+        
         # first aggregate qty and cf by date+schemeCode to handle multiple txns on a date
         aggTxns = txns.groupby(by=[constants.TXN_DATE, constants.ASSET_CODE]) \
             .agg({constants.TXN_CASHFLOW : sum, constants.TXN_QUANTITY : sum})

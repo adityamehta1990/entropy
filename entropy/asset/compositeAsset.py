@@ -1,13 +1,15 @@
 from abc import ABCMeta
 from abc import abstractmethod
-from entropy.asset.asset import Asset
+from asset import Asset
 import pandas as pd
+import six
 
 # base class for investments/assets which are a set of assets themselves
 # such as portfolio, fund, and benchmarks
 # this can implement holdings based analytics
 
-class CompositeAsset(Asset, metaclass=ABCMeta):
+@six.add_metaclass(ABCMeta)
+class CompositeAsset(Asset):
     isCompositeAsset = True
 
     # nav for composite asset is either stored or derived from its holdings/transaction history

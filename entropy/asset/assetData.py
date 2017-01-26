@@ -1,5 +1,6 @@
 import datetime
 from entropy.db import dbclient
+from entropy.utils import utils
 
 VALUE_DATE = "valueDate"
 ASSET_TYPE_KEY = 'assetType'
@@ -19,7 +20,7 @@ def availableValueDates(client):
     return [dt[VALUE_DATE] for dt in client.valueData({}, {VALUE_DATE : 1, dbclient.MONGO_ID : 0})]
 
 def updateValueDataOnDate(client, dt, valueMap):
-    valueMap[VALUE_DATE] = datetime.datetime(dt.year, dt.month, dt.day) # todo: define mkt close
+    valueMap[VALUE_DATE] = utils.marketCloseFromDate(dt)
     result = client.updateValueData({VALUE_DATE : dt}, {"$set" : valueMap}, upsert=True)
     return result.acknowledged
 
