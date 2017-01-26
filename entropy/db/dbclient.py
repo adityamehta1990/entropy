@@ -20,20 +20,11 @@ class MClient():
         result = self.fundDataColl.update_one(filterCondition, {"$set" : item}, upsert=True)
         return result.acknowledged
 
-    def valueDataOnDate(self, dt):
-        val = self.valueDataColl.find({"valueDate":dt}, {MONGO_ID:0})
-        if val.count() == 0:
-            return {}
-        elif val.count() > 1:
-            raise "Found duplicate valuations for date: {}".format(dt.isoformat())
-        return val[0]
+    def valueData(self, filterCondition, keys={}):
+        return self.valueDataColl.find(filterCondition, keys)
 
-    def valueDataById(self, _id):
-        return self.valueDataColl.find({}, {"valueDate": 1, str(_id): 1, MONGO_ID:0})
-
-    def updateValueData(self, dt, valueMap):
-        valueMap["valueDate"] = datetime.datetime(dt.year,dt.month,dt.day) # todo: define mkt close
-        result = self.valueDataColl.update_one({"valueDate":dt}, {"$set":valueMap}, upsert=True)
+    def updateValueData(self, filterCondition, valueMap):
+        result = self.valueDataColl.update_one(filterCondition, {"$set" : valueMap}, upsert=True)
         return result.acknowledged
 
     def portfolioData(self, filterCondition, keys={}):

@@ -55,7 +55,8 @@ def fundDataFromAMFI():
                 fundData.FUND_HOUSE : currFundHouse,
                 fundData.FUND_TYPE : currFundType,
                 fundData.FUND_CODE_AMFI : parts[0],
-                fundData.FUND_NAME_AMFI : parts[3]
+                fundData.FUND_NAME_AMFI : parts[3],
+                fundData.ISIN : parts[1]
             })
         else:
             currFundHouse = line
@@ -65,7 +66,7 @@ def fundDataFromAMFI():
 def updateDailyFundNAV(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
     valueMap = fundNAVFromAMFI(dt)
-    ack = fundData.updateFundNAV(client, dt, valueMap)
+    ack = fundData.updateFundNAVOnDate(client, dt, valueMap)
     return ack
 
 # this is a one time thing
@@ -77,7 +78,7 @@ def updateHistFundNAV(client,startDate=utils.dateParser('20060401')):
     ack = True
     while dt.date() != startDate:
         valueMap = fundNAVFromAMFI(dt)
-        ack = fundData.updateFundNAV(client, dt, valueMap) and ack
+        ack = fundData.updateFundNAVOnDate(client, dt, valueMap) and ack
         if( ack ):
             print("Update successful for %s"%(dt.date()))
         dt = dt - datetime.timedelta(days=1)

@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from entropy.db import dbclient
+from entropy.asset import assetData
 # define schema, possible values, etc
 
 # todo: rename to fundio and move fund stuff from dbio here
@@ -14,9 +15,9 @@ FUND_HOUSE = "fundHouse"
 FUND_TYPE = "fundType"
 FUND_TYPE_CHOICES = ["open ended", "close ended", "interval"]
 
+ISIN = "ISIN"
 ASSET_CLASS = "assetClass"
 STRATEGY_TYPE = "strategyType" # this is a short hand for investment attributes
-INVESTMENT_ATTRIBUTES = "investmentAttributes"
 
 FUND_CLASSIFICATION = {
     ASSET_CLASS : ['equity', 'debt', 'hybrid'],
@@ -44,7 +45,7 @@ HAS_DIVIDEND = 'hasDividend'
 DIVIDEND_PERIOD = 'hasDividend'
 IS_DIRECT = 'isDirect'
 
-FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE]
+FUND_ATTRIBUTES_AMFI = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE, ISIN]
 FUND_ATTRIBUTES_CALC = [FUND_NAME, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
 FUND_ATTRIBUTES_INPUT = list(FUND_CLASSIFICATION.keys()) + \
                         list(FUND_ATTRIBUTES_EQUITY.keys()) + \
@@ -53,7 +54,7 @@ FUND_ATTRIBUTES_INPUT = list(FUND_CLASSIFICATION.keys()) + \
 FUND_ATTRIBUTES = FUND_ATTRIBUTES_AMFI + FUND_ATTRIBUTES_CALC
 
 def fundList(client, navDate=None):
-    keys = dict([(key,1) for key in FUND_ATTRIBUTES])
+    keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
     funds = [f for f in client.fundData({}, keys)]
     if navDate is not None:
         vals = client.valueDataOnDate(navDate)
@@ -61,9 +62,9 @@ def fundList(client, navDate=None):
     return funds
 
 def fundInfo(client, _id):
-    keys = dict([(key,1) for key in FUND_ATTRIBUTES])
+    keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
     data = client.fundData({dbclient.MONGO_ID: _id}, keys)
-    if( data.count() == 1 ):
+    if(data.count() == 1):
         data = data[0]
     else:
         data = {}
@@ -72,28 +73,20 @@ def fundInfo(client, _id):
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo(client, _id, fundInfo):
     # check what got passed in from fundInfo
-    wrongKeys = [ key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES ]
+    wrongKeys = [key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES]
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     # now store
     return client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo)
 
-def fundNAV(client, _id):
-    data = [v for v in client.valueDataById(_id)]
-    idStr = str(_id)
-    values = [v.get(idStr) for v in data]
-    dates = [v["valueDate"] for v in data]
-    nav = pd.Series(values, dates)
-    return nav.dropna().sort_index()
-
-# merge and override fund NAV for date
-def updateFundNAV(client, dt, valueMap):
+# map values from amfi codes to internal IDs and update for given date
+def updateFundNAVOnDate(client, dt, valueMap):
     fundCodeMap = client.fundData({}, {FUND_CODE_AMFI:1})
     newValueMap = {}
     for fund in fundCodeMap:
         if valueMap.get(fund[FUND_CODE_AMFI]) is not None:
             newValueMap[str(fund[dbclient.MONGO_ID])] = valueMap[fund[FUND_CODE_AMFI]]
-    return client.updateValueData(dt, dict(newValueMap))
+    return assetData.updateValueDataOnDate(client, dt, dict(newValueMap))
 
 # only enrich missing data
 def enrichedFundInfo(client, _id):
@@ -105,9 +98,9 @@ def enrichedFundInfo(client, _id):
         pattern = re.compile('|'.join(FUND_RETURN_OPTIONS + FUND_INVESTMENT_OPTIONS), re.IGNORECASE)
         enrichedInfo[FUND_NAME] = '-'.join(filter(lambda x: not pattern.search(x), nameParts))
     if not info.get(IS_OPEN_ENDED):
-        enrichedInfo[IS_OPEN_ENDED] = re.compile('open ended scheme',re.IGNORECASE).search(info[FUND_TYPE]) is not None
+        enrichedInfo[IS_OPEN_ENDED] = re.compile('open ended scheme', re.IGNORECASE).search(info[FUND_TYPE]) is not None
     if not info.get(IS_DIRECT):
-        enrichedInfo[IS_DIRECT] = re.compile('direct',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+        enrichedInfo[IS_DIRECT] = re.compile('direct', re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
     if not info.get(HAS_DIVIDEND):
-        enrichedInfo[HAS_DIVIDEND] = re.compile('dividend',re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
+        enrichedInfo[HAS_DIVIDEND] = re.compile('dividend', re.IGNORECASE).search(info[FUND_NAME_AMFI]) is not None
     return enrichedInfo
