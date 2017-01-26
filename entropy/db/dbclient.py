@@ -13,7 +13,7 @@ class MClient():
         self.valueDataColl = db.value_data
 
     def assetMetaData(self, filterCondition, keys={}):
-        return self.assetDataColl.find(filterCondition, keys)
+        return self.assetMetaDataColl.find(filterCondition, keys)
 
     def updateAssetMetaData(self, filterCondition, item):
         result = self.assetMetaDataColl.update_one(filterCondition, {"$set" : item}, upsert=True)

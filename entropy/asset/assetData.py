@@ -21,8 +21,8 @@ def availableValueDates(client):
 
 def updateValueDataOnDate(client, dt, valueMap):
     valueMap[VALUE_DATE] = utils.marketCloseFromDate(dt)
-    result = client.updateValueData({VALUE_DATE : dt}, {"$set" : valueMap}, upsert=True)
-    return result.acknowledged
+    ack = client.updateValueData({VALUE_DATE : dt}, valueMap)
+    return ack
 
 def insertValuesForId(client, _id, ts):
     pass

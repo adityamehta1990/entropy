@@ -4,7 +4,7 @@ import entropy.utils.utils as utils
 
 client = dbclient.MClient()
 funds = fundDataFeed.fundDataFromAMFI()
-res = client.fundDataColl.insert_many(funds)
+res = client.assetMetaDataColl.insert_many(funds)
 
 # daily
 fundDataFeed.updateDailyFundNAV(client)
