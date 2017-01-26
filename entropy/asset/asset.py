@@ -4,6 +4,7 @@ import pandas as pd
 import six
 from entropy import analytics
 from entropy.asset import assetData
+from bson.objectid import ObjectId
 
 # base class for any type of asset/investment - fund, stock, bond
 # this can implement returns and risk based analytics
@@ -11,20 +12,24 @@ from entropy.asset import assetData
 @six.add_metaclass(ABCMeta)
 class Asset():
     # every asset must have the following:
-    client = None
-    _id = None
-    idStr = None
+    client = None   # db client
+    mongoId = None  # mongoID for assets in assetMetaDataColl
+    Id = None       # unique ID for all assets, MUST be a hexstring
     isCompositeAsset = False
+
+    def __init__(self,Id,client):
+        self.client = client
+        self.Id = str(Id)               # typecasting, in case it isn't a string
+        self.mongoId = ObjectId(Id)     # not used for assets not in assetMetaDataColl
 
     # values for base assets are stored not derived
     def nav(self):
-        data = [v for v in assetData.valuesById(self.client, self._id)]
-        idStr = str(self._id)
-        values = [v.get(idStr) for v in data]
+        data = [v for v in assetData.valuesById(self.client, self.mongoId)]
+        values = [v.get(self.Id) for v in data]
         dates = [v[assetData.VALUE_DATE] for v in data]
         nav = pd.Series(values, dates)
         return nav.dropna().sort_index()
-
+    
     @abstractmethod
     def cashflow(self):
         pass

@@ -17,23 +17,23 @@ def getFundList():
 def getFundListOnDate(navDate):
     return utils.json(fundData.fundList(client, utils.dateParser(navDate)))
 
-@fund_api.route('/fund/<_id>', methods=['GET'])
-def getFundInfo(_id):
-    return utils.json(Fund(_id,client).fundInfo())
+@fund_api.route('/fund/<Id>', methods=['GET'])
+def getFundInfo(Id):
+    return utils.json(Fund(Id,client).fundInfo())
 
-@fund_api.route('/enriched/<_id>')
-def enrichedFundInfo(_id):
-    return utils.json(fundData.enrichedFundInfo(client, _id))
+@fund_api.route('/enriched/<Id>')
+def enrichedFundInfo(Id):
+    return utils.json(fundData.enrichedFundInfo(client, Id))
 
-@fund_api.route('/fund/<_id>', methods=['POST'])
-def updateFundInfo(_id):
+@fund_api.route('/fund/<Id>', methods=['POST'])
+def updateFundInfo(Id):
     fundInfo = request.get_json()
-    return utils.json(fundData.updateFundInfo(client, _id, fundInfo))
+    return utils.json(fundData.updateFundInfo(client, Id, fundInfo))
 
-@fund_api.route('/nav/<_id>')
-def getFundNav(_id):
-    return utils.json(utils.ts2dict(Fund(_id, client).nav()))
+@fund_api.route('/nav/<Id>')
+def getFundNav(Id):
+    return utils.json(utils.ts2dict(Fund(Id, client).nav()))
 
-@fund_api.route('/return/<_id>/<window>')
-def getFundReturn(_id, window):
-    return utils.json(utils.ts2dict(Fund(_id, client).rollingReturn(window)))
+@fund_api.route('/return/<Id>/<window>')
+def getFundReturn(Id, window):
+    return utils.json(utils.ts2dict(Fund(Id, client).rollingReturn(window)))

@@ -62,9 +62,9 @@ def fundList(client, navDate=None):
         funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
     return funds
 
-def fundInfo(client, _id):
+def fundInfo(client, mongoId):
     keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
-    data = client.assetMetaData({dbclient.MONGO_ID: _id}, keys)
+    data = client.assetMetaData({dbclient.MONGO_ID: mongoId}, keys)
     if(data.count() == 1):
         data = data[0]
     else:
@@ -72,13 +72,13 @@ def fundInfo(client, _id):
     return data
 
 # fundInfo can be passed back from website or can be "enriched"
-def updateFundInfo(client, _id, fundInfo):
+def updateFundInfo(client, mongoId, fundInfo):
     # check what got passed in from fundInfo
     wrongKeys = [key for key in fundInfo.keys() if key not in FUND_ATTRIBUTES]
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     # now store
-    return client.updateAssetMetaData({dbclient.MONGO_ID: _id}, fundInfo)
+    return client.updateAssetMetaData({dbclient.MONGO_ID: mongoId}, fundInfo)
 
 # map values from amfi codes to internal IDs and update for given date
 def updateFundNAVOnDate(client, dt, valueMap):
@@ -90,8 +90,8 @@ def updateFundNAVOnDate(client, dt, valueMap):
     return assetData.updateValueDataOnDate(client, dt, dict(newValueMap))
 
 # only enrich missing data
-def enrichedFundInfo(client, _id):
-    info = fundInfo(client, _id)
+def enrichedFundInfo(client, mongoId):
+    info = fundInfo(client, mongoId)
     enrichedInfo = {}
     nameParts = [part.strip() for part in info[FUND_NAME_AMFI].split('-')]
     # amfi info based enrichment logic

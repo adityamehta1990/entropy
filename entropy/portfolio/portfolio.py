@@ -9,15 +9,9 @@ from entropy.asset.compositeAsset import CompositeAsset
 # todo : replace all strings with constants
 
 class Portfolio(CompositeAsset):
-    portfolioId=None
-    client=None
-
-    def __init__(self, portfolioId, client):
-        self.portfolioId = portfolioId
-        self.client = client
 
     def portfolioData(self):
-        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.portfolioId}, {constants.TRANSACTIONS : 0})
+        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.Id}, {constants.TRANSACTIONS : 0})
         if(data.count() == 1):
             P = data[0]
         else:
@@ -25,7 +19,7 @@ class Portfolio(CompositeAsset):
         return P
 
     def transactions(self):
-        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.portfolioId})
+        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.Id})
         if(data.count() == 1):
             Ts = data[0][constants.TRANSACTIONS]
         else:
