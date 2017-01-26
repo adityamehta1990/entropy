@@ -12,7 +12,7 @@ class CompositeAsset(Asset, metaclass=ABCMeta):
 
     # nav for composite asset is either stored or derived from its holdings/transaction history
     def nav(self):
-        super(CompositeAsset, self).nav()
+        return super(CompositeAsset, self).nav()
 
     def cashflow(self):
         pass
