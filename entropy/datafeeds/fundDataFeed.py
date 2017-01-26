@@ -76,9 +76,9 @@ def updateDailyFundNAV(client):
 def updateHistFundNAV(client,startDate=utils.dateParser('20060401')):
     # todo: check min updated date and use that
     # this will just refill everything
-    dt  = datetime.datetime.today() - datetime.timedelta(days=2)    
+    dt  = datetime.datetime.today() - datetime.timedelta(days=2)
     ack = True
-    while dt.date() != startDate:
+    while dt != startDate:
         valueMap = fundNAVFromAMFI(dt)
         ack = fundData.updateFundNAVOnDate(client, dt, valueMap) and ack
         if( ack ):

@@ -20,8 +20,8 @@ def availableValueDates(client):
 
 def updateValueDataOnDate(client, dt, valueMap):
     valueMap[VALUE_DATE] = datetime.datetime(dt.year, dt.month, dt.day) # todo: define mkt close
-    result = client.updateValueData({VALUE_DATE : dt}, {"$set" : valueMap}, upsert=True)
-    return result.acknowledged
+    ack = client.updateValueData({VALUE_DATE : dt}, valueMap)
+    return ack
 
 def insertValuesForId(client, _id, ts):
     pass
