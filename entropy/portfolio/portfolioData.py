@@ -1,23 +1,8 @@
 import hashlib
 import datetime
-from entropy.portfolio.portfolio import Portfolio
+from constants import *
+from portfolio import Portfolio
 from entropy.utils import utils
-
-# portfolio schema
-CLIENT_NAME = "clientName"
-PORTFOLIO_ID = "portfolioId"
-PORTFOLIO_NAME = "portfolioName"
-TRANSACTIONS = "transactions"
-DATE_CREATED = "dateCreated"
-
-# transaction schema
-TRANSACTION_ID = "txnId"
-ASSET_CODE = "assetCode"
-ASSET_NAME = "assetName"
-TXN_CASHFLOW = "cashflow"
-TXN_QUANTITY = "quantity"
-TXN_PRICE = "price"
-TXN_DATE = "txnDate"
 
 def clientPortfolios(client, clientName):
     schemeCols = dict([(key, 1) for key in [PORTFOLIO_ID, PORTFOLIO_NAME, DATE_CREATED]])
@@ -72,3 +57,6 @@ def addTransaction(client, portfolioId, schemeCode, schemeName, cashflow, quanti
 def removeTransaction(client, portfolioId, transactionId):
     Ts = [txn for txn in Portfolio(portfolioId,client).transactions() if txn.get(TRANSACTION_ID) != transactionId]
     return client.updatePortfolio({PORTFOLIO_ID : portfolioId}, {TRANSACTIONS : Ts})
+
+def removeAllTransactions(client, portfolioId):
+    return client.updatePortfolio({PORTFOLIO_ID : portfolioId}, {TRANSACTIONS : []})

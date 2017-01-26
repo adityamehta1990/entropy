@@ -3,7 +3,7 @@ import pandas as pd
 from entropy.fund import fundData
 from entropy.fund.fund import Fund
 from entropy.investment import Investment
-from entropy.portfolio import portfolioData
+import constants
 
 # todo : replace all strings with constants
 
@@ -16,7 +16,7 @@ class Portfolio(Investment):
         self.client = client
 
     def portfolioData(self):
-        data = self.client.portfolioData({portfolioData.PORTFOLIO_ID : self.portfolioId}, {portfolioData.TRANSACTIONS : 0})
+        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.portfolioId}, {constants.TRANSACTIONS : 0})
         if(data.count() == 1):
             P = data[0]
         else:
@@ -24,9 +24,9 @@ class Portfolio(Investment):
         return P
 
     def transactions(self):
-        data = self.client.portfolioData({portfolioData.PORTFOLIO_ID : self.portfolioId})
+        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.portfolioId})
         if(data.count() == 1):
-            Ts = data[0][portfolioData.TRANSACTIONS]
+            Ts = data[0][constants.TRANSACTIONS]
         else:
             Ts = []
         return Ts
@@ -36,19 +36,19 @@ class Portfolio(Investment):
     def aggregateTxns(self):
         txns = pd.DataFrame(self.transactions())
         # first aggregate qty and cf by date+schemeCode to handle multiple txns on a date
-        aggTxns = txns.groupby(by=[portfolioData.TXN_DATE, portfolioData.ASSET_CODE]) \
-            .agg({portfolioData.TXN_CASHFLOW : sum, portfolioData.TXN_QUANTITY : sum})
-        cumAggTxns = aggTxns.groupby(level=portfolioData.ASSET_CODE) \
+        aggTxns = txns.groupby(by=[constants.TXN_DATE, constants.ASSET_CODE]) \
+            .agg({constants.TXN_CASHFLOW : sum, constants.TXN_QUANTITY : sum})
+        cumAggTxns = aggTxns.groupby(level=constants.ASSET_CODE) \
             .cumsum() \
-            .rename(columns={portfolioData.TXN_CASHFLOW : 'cum_cashflow', portfolioData.TXN_QUANTITY : 'cum_quantity'})
+            .rename(columns={constants.TXN_CASHFLOW : 'cum_cashflow', constants.TXN_QUANTITY : 'cum_quantity'})
         # concat cum by index and reset to date index
-        return pd.concat([aggTxns, cumAggTxns], axis=1).reset_index(level=portfolioData.ASSET_CODE)
+        return pd.concat([aggTxns, cumAggTxns], axis=1).reset_index(level=constants.ASSET_CODE)
 
     # actual market value of portfolio
     def marketValue(self):
         aggTxns = self.aggregateTxns()
         # front fill by padding so that there are only leading NAs
-        qty = aggTxns.pivot(columns=portfolioData.ASSET_CODE, values='cum_quantity') \
+        qty = aggTxns.pivot(columns=constants.ASSET_CODE, values='cum_quantity') \
             .fillna(method='pad')
         # generate empty mv curve from first txn to today
         index = pd.DatetimeIndex(freq='D', start=qty.first_valid_index(), end=datetime.datetime.today())

@@ -16,6 +16,9 @@ def localizeToIST(dt):
     ist = timezone('Asia/Kolkata')
     return ist.localize(dt)
 
+def addToDate(date,deltaInDays):
+    return date + datetime.timedelta(days=deltaInDays)
+    
 # parse ISO date string to datetime
 def dateParser(dateStr):
     return parse(dateStr)
