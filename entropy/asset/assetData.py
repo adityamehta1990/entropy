@@ -1,8 +1,8 @@
 import datetime
 from entropy.db import dbclient
 
-ASSET_ATTRIBUTES = ['assetType', 'assetClass']
 VALUE_DATE = "valueDate"
+ASSET_TYPE_KEY = 'assetType'
 
 def valueDataOnDate(client, dt):
     val = client.valueData({VALUE_DATE : dt}, {dbclient.MONGO_ID : 0})

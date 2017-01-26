@@ -3,6 +3,7 @@ import requests
 import datetime
 from entropy.fund import fundData
 from entropy.utils import utils
+from entropy.asset import assetData
 
 AMFI_DAILY_NAV_URL = 'http://portal.amfiindia.com/spages/NAV0.txt'
 # http://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?mf=53&tp=1&frmdt=02-Jan-2017&todt=03-Jan-2017
@@ -56,7 +57,8 @@ def fundDataFromAMFI():
                 fundData.FUND_TYPE : currFundType,
                 fundData.FUND_CODE_AMFI : parts[0],
                 fundData.FUND_NAME_AMFI : parts[3],
-                fundData.ISIN : parts[1]
+                fundData.ISIN : parts[1],
+                assetData.ASSET_TYPE_KEY : fundData.ASSET_TYPE
             })
         else:
             currFundHouse = line

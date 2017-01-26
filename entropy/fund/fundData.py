@@ -16,6 +16,7 @@ FUND_TYPE = "fundType"
 FUND_TYPE_CHOICES = ["open ended", "close ended", "interval"]
 
 ISIN = "ISIN"
+ASSET_TYPE = "fund"
 ASSET_CLASS = "assetClass"
 STRATEGY_TYPE = "strategyType" # this is a short hand for investment attributes
 
@@ -55,7 +56,7 @@ FUND_ATTRIBUTES = FUND_ATTRIBUTES_AMFI + FUND_ATTRIBUTES_CALC
 
 def fundList(client, navDate=None):
     keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
-    funds = [f for f in client.fundData({}, keys)]
+    funds = [f for f in client.assetMetaData({assetData.ASSET_TYPE_KEY : ASSET_TYPE}, keys)]
     if navDate is not None:
         vals = client.valueDataOnDate(navDate)
         funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
@@ -63,7 +64,7 @@ def fundList(client, navDate=None):
 
 def fundInfo(client, _id):
     keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
-    data = client.fundData({dbclient.MONGO_ID: _id}, keys)
+    data = client.assetMetaData({dbclient.MONGO_ID: _id}, keys)
     if(data.count() == 1):
         data = data[0]
     else:
@@ -77,11 +78,11 @@ def updateFundInfo(client, _id, fundInfo):
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     # now store
-    return client.updateFundData({dbclient.MONGO_ID: _id}, fundInfo)
+    return client.updateAssetMetaData({dbclient.MONGO_ID: _id}, fundInfo)
 
 # map values from amfi codes to internal IDs and update for given date
 def updateFundNAVOnDate(client, dt, valueMap):
-    fundCodeMap = client.fundData({}, {FUND_CODE_AMFI:1})
+    fundCodeMap = client.assetMetaData({assetData.ASSET_TYPE_KEY : ASSET_TYPE}, {FUND_CODE_AMFI:1})
     newValueMap = {}
     for fund in fundCodeMap:
         if valueMap.get(fund[FUND_CODE_AMFI]) is not None:
