@@ -20,7 +20,8 @@ class Asset():
     def __init__(self,Id,client):
         self.client = client
         self.Id = str(Id)               # typecasting, in case it isn't a string
-        self.mongoId = ObjectId(Id)     # not used for assets not in assetMetaDataColl
+        if(len(self.Id)==24):
+            self.mongoId = ObjectId(Id) # not used for assets not in assetMetaDataColl
 
     # values for base assets are stored not derived
     def nav(self):
