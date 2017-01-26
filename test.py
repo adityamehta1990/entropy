@@ -34,10 +34,9 @@ Txns = [
 Txns = pd.DataFrame(Txns[1:],columns=Txns[0])
 
 for txn in Txns.itertuples():
-    schemeName = [ f for f in fundList \
-                  if f[ fundData.FUND_CODE_AMFI ] == txn.schemeCode ][0][ fundData.FUND_NAME_AMFI];
+    fund = Fund(fundIdFromAmfiCode(client,txn.schemeCode),client)
     po.addTransaction( \
-        client, Id, txn.schemeCode, schemeName, \
+        client, Id, fund.Id, fund.fundInfo()[fundData.FUND_NAME_AMFI], \
         txn.cashFlow, 0, utils.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
      )
 

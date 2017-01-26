@@ -71,6 +71,13 @@ def fundInfo(client, mongoId):
         data = {}
     return data
 
+# todo: add test: Fund(fundIdFromAmfiCode(client,'125494'),client).fundInfo()[FUND_CODE_AMFI] == '125494'
+def fundIdFromAmfiCode(client, schemeCode):
+    data = client.assetMetaData({assetData.ASSET_TYPE_KEY : ASSET_TYPE, \
+                                 FUND_CODE_AMFI : schemeCode}, {FUND_CODE_AMFI : 1})
+    assert data.count() == 1, "Invalid schemeCode"
+    return str(data[0][dbclient.MONGO_ID])
+
 # fundInfo can be passed back from website or can be "enriched"
 def updateFundInfo(client, mongoId, fundInfo):
     # check what got passed in from fundInfo

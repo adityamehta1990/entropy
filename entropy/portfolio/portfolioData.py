@@ -38,20 +38,20 @@ def newTransactionId(transactions):
     else:
         return 0
 
-def newTransaction(Id, schemeCode, schemeName, cashflow, quantity, date):
+def newTransaction(Id, assetId, schemeName, cashflow, quantity, date):
     return({
         TRANSACTION_ID : Id,
-        ASSET_CODE : schemeCode,
+        ASSET_CODE : assetId,
         ASSET_NAME : schemeName,
         TXN_CASHFLOW : cashflow,
         TXN_QUANTITY : quantity,
         TXN_DATE : date
     })
 
-def addTransaction(client, portfolioId, schemeCode, schemeName, cashflow, quantity, date):
+def addTransaction(client, portfolioId, assetId, schemeName, cashflow, quantity, date):
     Ts = Portfolio(portfolioId, client).transactions()
     transactionId = newTransactionId(Ts)
-    Ts.append(newTransaction(transactionId, schemeCode, schemeName, cashflow, quantity, date))
+    Ts.append(newTransaction(transactionId, assetId, schemeName, cashflow, quantity, date))
     return client.updatePortfolio({PORTFOLIO_ID : portfolioId}, {TRANSACTIONS : Ts })
 
 def removeTransaction(client, portfolioId, transactionId):
