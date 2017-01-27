@@ -1,10 +1,12 @@
 from flask import jsonify
 from flask.json import JSONEncoder
 from datetime import datetime
+from datetime import timedelta
 from bson.objectid import ObjectId
 from dateutil.parser import parse
 from pytz import timezone
 import pandas as pd
+import numpy as np
 
 # todo: Compartmentalize this into different scripts
 
@@ -26,6 +28,13 @@ def addToDate(date,deltaInDays):
     return date + datetime.timedelta(days=deltaInDays)
     return date + datetime.timedelta(days=deltaInDays)
 
+def lastNonNa(a):
+    ind = np.where(~np.isnan(a))[0]
+    if len(ind) == 0:
+        return np.NaN
+    else:
+        return a[ind[-1]]
+
 # parse ISO date string to datetime
 def dateParser(dateStr):
     return parse(dateStr)
@@ -33,20 +42,41 @@ def dateParser(dateStr):
 def marketCloseFromDate(dt):
     return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR);
 
-# todo: implement
-def dailyClose(df):
-    pass
-
-# todo: implement
-def dailySum(df):
-    pass
+def nextMarketClose(dt):
+    if dt > marketCloseFromDate(dt):
+        dt = dt + timedelta(days=1)
+    # Yes, I know ( max( dt.weekday(), 4 ) - 4 ) gives the same as following,
+    # But try explaining that to your grandmonther
+    if dt.weekday() >= 5:
+        weekdayAdj = 7 - dt.weekday()
+    else:
+        weekdayAdj = 0
+    return datetime(dt.year, dt.month, dt.day + weekdayAdj, MARKET_CLOSE_HOUR);
 
 # regular week dates
-def periodicDates(startDate,endDate=datetime.today()):
+def regularWeekDates(startDate,endDate=datetime.today()):
     start = marketCloseFromDate(startDate)
     end = marketCloseFromDate(endDate)
     dates = pd.DatetimeIndex(freq='D', start=start, end=end)
     return [ d for d in dates if d.weekday() < 5 ] # Num Weekday: Monday = 0, Sunday = 6
+
+def alignToRegularWeekDates(df,method=None):
+    if len(df) == 0:
+        return df
+    return df.reindex(index=regularWeekDates(df.index[0],df.index[-1]),method=method)
+
+# todo: implement
+def _dailyAgg(df,aggFunc):
+    df['nextMarketClose'] = df.apply(lambda r: nextMarketClose(r.name), axis=1)
+    df = df.groupby('nextMarketClose').aggregate(aggFunc)
+    df.index.name = None
+    return df
+
+def dailyClose(df):
+    return _dailyAgg(df,lastNonNa)
+
+def dailySum(df):
+    return _dailyAgg(df,np.sum)
     
 def json( data ):
     return( jsonify( { JSON_KEY : data } ) )

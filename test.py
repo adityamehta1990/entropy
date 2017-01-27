@@ -1,45 +1,45 @@
-from entropy.db import dbclient
-import entropy.portfolio.portfolioData as po
-from entropy.portfolio.constants import *
-import entropy.utils.utils as utils
-import datetime
-import entropy.fund.fundData as fundData
-from entropy.fund.fund import Fund
-from entropy.portfolio.portfolio import Portfolio
+# Unorganized test fns
+import numpy as np
 import pandas as pd
+from datetime import timedelta
+from entropy.utils import utils
 
-client = dbclient.MClient()
-date = utils.dateParser('20150101');
-fundList = fundData.fundList(client)
+def dfFromTable(Table):
+    header = Table[0]
+    df = pd.DataFrame(Table[1:])
+    df.columns = Table[0]
+    df.index = df.apply(lambda row: utils.dateParser(row['Date']) + timedelta(hours=row['Hour']), axis=1)
+    return df[ [ c for c in df.columns if c != 'Date' and c != 'Hour' ] ]
 
-# adding new portfolio, if it doesn't exist
-clientName = 'Warren Buffet'
-if( len(po.clientPortfolios(client,clientName)) == 0 ):
-    po.addPortfolio(client, clientName, "my Life's Savings")
-Id = po.clientPortfolios(client,clientName)[0][PORTFOLIO_ID]
-
-Txns = [
-    [ "date",       "hour", "schemeCode",   "cashFlow"  ],
-    [ "20150105",   5,      "125494",       1e4         ],
-    [ "20150301",   7,      "100356",       2e4         ],
-    [ "20150601",   13,     "118991",       3e3         ],
-    [ "20150701",   7,      "101042",       4e3         ],
-    [ "20150701",   11,     "100356",       6e4         ],
-    [ "20150901",   14,     "113566",       4e4         ],
-    [ "20150901",   15,     "113566",       1e4         ],
-    [ "20160105",   5,      "118991",       9e4         ],
-    [ "20160105",   8,      "125494",       -3e3        ],
-    [ "20160105",   10,     "118991",       7e3         ],
+# Test for daily close
+E = np.NaN
+T1 = [
+    [ "Date",       "Hour", "Value 1",  "Value 2"   ],
+    [ "20170127",   5,      3,          E           ],
+    [ "20170127",   11,     E,          E           ],
+    [ "20170127",   13,     4,          E           ],
+    [ "20170127",   19,     E,          5           ],
+    [ "20170128",   5,      3,          9           ],
+    [ "20170129",   17,     E,          4           ],
+    [ "20170130",   12,     4,          E           ],
+    [ "20170202",   7,      E,          5           ],
+    [ "20170202",   9,      E,          3           ],
+    [ "20170202",   22,     4,          7           ],
+    [ "20170203",   15,     E,          5           ],
 ];
 
-Txns = pd.DataFrame(Txns[1:],columns=Txns[0])
+T2 = [
+    [ "Date",       "Hour", "Value 1",  "Value 2"   ],
+    [ "20170127",   14,      7,          E           ],
+    [ "20170130",   14,      7,          18          ],
+    [ "20170131",   14,      E,          E           ],
+    [ "20170201",   14,      E,          E           ],
+    [ "20170202",   14,      E,          8           ],
+    [ "20170203",   14,      4,          7           ],
+    [ "20170206",   14,      E,          5           ],
+];
 
-for txn in Txns.itertuples():
-    fund = Fund(fundData.fundIdFromAmfiCode(client,txn.schemeCode),client)
-    po.addTransaction( \
-        client, Id, fund.Id, fund.fundInfo()[fundData.FUND_NAME_AMFI], \
-        txn.cashFlow, 0, utils.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
-     )
-
-# P = Portfolio(Id = Id,client=client)
-# P.transactions()
+df1 = dfFromTable(T1);
+df2 = dfFromTable(T2);
+df3 = utils.alignToRegularWeekDates(utils.dailySum(df1))
+assert df3.equals(df2)
