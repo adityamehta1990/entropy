@@ -1,8 +1,8 @@
 from abc import ABCMeta
 from abc import abstractmethod
-from asset import Asset
 import pandas as pd
 import six
+from entropy.asset.asset import Asset
 
 # base class for investments/assets which are a set of assets themselves
 # such as portfolio, fund, and benchmarks
