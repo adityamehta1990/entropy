@@ -1,9 +1,16 @@
 import datetime
 from entropy.db import dbclient
 from entropy.utils import utils
+from bson.objectid import ObjectId
 
 VALUE_DATE = "valueDate"
 ASSET_TYPE_KEY = 'assetType'
+
+# todo: all the functions here take mongoIds and not Ids
+#       either pass Ids or change function names
+
+def mongoIdFromId(Id):
+    return ObjectId(Id)
 
 def assetInfoById(client, mongoId, keys=[]):
     projection = dict([(key, 1) for key in keys])
@@ -29,11 +36,11 @@ def valueDataOnDate(client, dt):
         raise "Found duplicate valuations for date: {}".format(dt.isoformat())
     return val[0]
 
-def valuesById(client, Id):
+def valuesById(client, mongoId):
     return [v for v in client.valueData({}, {VALUE_DATE: 1, Id: 1, dbclient.MONGO_ID: 0})]
 
-def valuesByIds(client, Ids):
-    keys = dict([(Id, 1) for Id in Ids])
+def valuesByIds(client, mongoIds):
+    keys = dict([(Id, 1) for Id in mongoIds])
     keys.update({VALUE_DATE : 1, dbclient.MONGO_ID : 0})
     return [v for v in client.valueData({}, keys)]
 

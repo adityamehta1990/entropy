@@ -2,6 +2,7 @@ import datetime
 import pandas as pd
 from entropy.fund.fund import Fund
 import entropy.portfolio.constants as pc
+import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
 
 class Portfolio(CompositeAsset):
@@ -14,6 +15,9 @@ class Portfolio(CompositeAsset):
             P = {}
         return P
 
+    def isSavedAsset(self):
+        return False
+    
     def transactions(self):
         data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id})
         if data.count() == 1:
@@ -22,14 +26,8 @@ class Portfolio(CompositeAsset):
             Ts = []
         return Ts
 
-    def holdings(self):
-        return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
-
-    # todo: can be implemented in the CompositeAsset class
-    #       must figure out the AssetType from the ID
-    def navHoldings(self):
-        navs = dict([(Id, Fund(Id, self.client).nav()) for Id in self.holdings()])
-        return pd.DataFrame(navs)
+    def holdingsIds(self):
+        return map(assetData.mongoIdFromId,list(set([txn[pc.ASSET_CODE] for txn in self.transactions()])))
 
     # todo: add composite asset class which has exploded holdings
     # this is really holdings/investments
