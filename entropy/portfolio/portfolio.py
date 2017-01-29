@@ -1,61 +1,57 @@
 import datetime
 import pandas as pd
-from entropy.fund import fundData
 from entropy.fund.fund import Fund
-import constants
-from entropy.asset.asset import Asset
+import entropy.portfolio.constants as pc
 from entropy.asset.compositeAsset import CompositeAsset
-
-# todo : replace all strings with constants
 
 class Portfolio(CompositeAsset):
 
     def portfolioData(self):
-        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.Id}, {constants.TRANSACTIONS : 0})
-        if(data.count() == 1):
+        data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id}, {pc.TRANSACTIONS : 0})
+        if data.count() == 1:
             P = data[0]
         else:
             P = {}
         return P
 
     def transactions(self):
-        data = self.client.portfolioData({constants.PORTFOLIO_ID : self.Id})
-        if(data.count() == 1):
-            Ts = data[0][constants.TRANSACTIONS]
+        data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id})
+        if data.count() == 1:
+            Ts = data[0][pc.TRANSACTIONS]
         else:
             Ts = []
         return Ts
 
     def holdings(self):
-        return list( set( [ txn[constants.ASSET_CODE] for txn in self.transactions() ] ) )
+        return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
 
     # todo: can be implemented in the CompositeAsset class
     #       must figure out the AssetType from the ID
     def navHoldings(self):
-        navs = dict([ (Id, Fund(Id,self.client).nav()) for Id in self.holdings() ]);
+        navs = dict([(Id, Fund(Id, self.client).nav()) for Id in self.holdings()])
         return pd.DataFrame(navs)
 
     # todo: add composite asset class which has exploded holdings
     # this is really holdings/investments
     def aggregateTxns(self):
         txns = pd.DataFrame(self.transactions())
-        cf = txns.pivot(columns=constants.ASSET_CODE, values=constants.TXN_CASHFLOW, index=constants.TXN_DATE)
-        quantity = txns.pivot(columns=constants.ASSET_CODE, values=constants.TXN_QUANTITY, index=constants.TXN_DATE)
+        cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
+        quantity = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
         
         # first aggregate qty and cf by date+schemeCode to handle multiple txns on a date
-        aggTxns = txns.groupby(by=[constants.TXN_DATE, constants.ASSET_CODE]) \
-            .agg({constants.TXN_CASHFLOW : sum, constants.TXN_QUANTITY : sum})
-        cumAggTxns = aggTxns.groupby(level=constants.ASSET_CODE) \
+        aggTxns = txns.groupby(by=[pc.TXN_DATE, pc.ASSET_CODE]) \
+            .agg({pc.TXN_CASHFLOW : sum, pc.TXN_QUANTITY : sum})
+        cumAggTxns = aggTxns.groupby(level=pc.ASSET_CODE) \
             .cumsum() \
-            .rename(columns={constants.TXN_CASHFLOW : 'cum_cashflow', constants.TXN_QUANTITY : 'cum_quantity'})
+            .rename(columns={pc.TXN_CASHFLOW : 'cum_cashflow', pc.TXN_QUANTITY : 'cum_quantity'})
         # concat cum by index and reset to date index
-        return pd.concat([aggTxns, cumAggTxns], axis=1).reset_index(level=constants.ASSET_CODE)
+        return pd.concat([aggTxns, cumAggTxns], axis=1).reset_index(level=pc.ASSET_CODE)
 
     # actual market value of portfolio
     def marketValue(self):
         aggTxns = self.aggregateTxns()
         # front fill by padding so that there are only leading NAs
-        qty = aggTxns.pivot(columns=constants.ASSET_CODE, values='cum_quantity') \
+        qty = aggTxns.pivot(columns=pc.ASSET_CODE, values='cum_quantity') \
             .fillna(method='pad')
         # generate empty mv curve from first txn to today
         index = pd.DatetimeIndex(freq='D', start=qty.first_valid_index(), end=datetime.datetime.today())
@@ -79,4 +75,4 @@ class Portfolio(CompositeAsset):
     # todo: add options for groupby, cumulative and send back to FE
     def cashflow(self):
         aggTxns = self.aggregateTxns()
-        return pd.Series(aggTxns.groupby(level=portfolioData.TXN_DATE).sum().cashflow)
+        return pd.Series(aggTxns.groupby(level=pc.TXN_DATE).sum().cashflow)
