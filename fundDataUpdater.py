@@ -3,11 +3,10 @@ from entropy.db import dbclient
 import entropy.utils.utils as utils
 
 client = dbclient.MClient()
-funds = fundDataFeed.fundDataFromAMFI()
-res = client.assetMetaDataColl.insert_many(funds)
-
+# update meta data
+fundDataFeed.updateFundMetaData(client)
 # daily
 fundDataFeed.updateDailyFundNAV(client)
 # historical
-# fundDataFeed.updateHistFundNAV(client)
+# fundDataFeed.updateHistFundNAV(client) # for full history
 fundDataFeed.updateHistFundNAV(client,startDate=utils.dateParser('20140401'))

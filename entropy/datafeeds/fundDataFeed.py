@@ -65,6 +65,16 @@ def fundDataFromAMFI():
             currFundHouse = line
     return fundList
 
+def updateFundMetaData(client):
+    fundInfoArray = fundDataFromAMFI()
+    ack = True
+    for fi in fundInfoArray:
+        fundData.checkFundAttributes(fi)
+        amfiCode = fi.get(fc.FUND_CODE_AMFI)
+        if amfiCode:
+            ack = client.updateAssetMetaData({fc.FUND_CODE_AMFI: amfiCode}, fi) and ack
+    return ack
+
 # this should be called separately from the server (without concurrent dbclients preferably)
 def updateDailyFundNAV(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)

@@ -20,12 +20,16 @@ def fundIdFromAmfiCode(client, amfiCode):
     assert data.count() == 1, "Invalid amfi code"
     return str(data[0][dbclient.MONGO_ID])
 
-# fundInfo can be passed back from website or can be "enriched"
-def updateFundInfo(client, Id, fundInfo):
-    # check what got passed in from fundInfo
+# check what got passed in from fundInfo
+def checkFundAttributes(fundInfo):
     wrongKeys = [key for key in fundInfo.keys() if key not in fc.FUND_ATTRIBUTES]
     if len(wrongKeys):
         raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
+    return True
+
+# fundInfo can be passed back from website or can be "enriched"
+def updateFundInfo(client, Id, fundInfo):
+    checkFundAttributes(fundInfo)
     # now store
     return assetData.updateAssetInfo(client, Id, fundInfo)
 
