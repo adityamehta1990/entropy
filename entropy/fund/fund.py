@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from entropy.asset.compositeAsset import CompositeAsset
-from entropy.fund import fundData
+import entropy.fund.constants as fc
 
 class Fund(CompositeAsset):
 
@@ -15,6 +15,6 @@ class Fund(CompositeAsset):
 
     def fundInfo(self):
         # this will keep missing keys with nones
-        info = dict.fromkeys(fundData.FUND_ATTRIBUTES)
-        info.update(self.assetInfo(fundData.FUND_ATTRIBUTES))
+        info = dict.fromkeys(fc.FUND_ATTRIBUTES)
+        info.update(self.assetInfo(fc.FUND_ATTRIBUTES))
         return info

@@ -2,6 +2,7 @@ import re
 import requests
 import datetime
 from entropy.fund import fundData
+import entropy.fund.constants as fc
 from entropy.utils import utils
 from entropy.asset import assetData
 
@@ -45,7 +46,7 @@ def fundDataFromAMFI():
     # schema = data[0].split(';')
     data = [line.strip() for line in data[1:] if len(line.strip()) > 0]
     fundList = []
-    pattern = re.compile('|'.join(fundData.FUND_TYPE_CHOICES), re.IGNORECASE)
+    pattern = re.compile('|'.join(fc.FUND_TYPE_CHOICES), re.IGNORECASE)
     currFundType = currFundHouse = ""
     for line in data:
         if pattern.search(line) is not None:
@@ -53,12 +54,12 @@ def fundDataFromAMFI():
         elif line.find(';') >= 0:
             parts = line.split(';')
             fundList.append({
-                fundData.FUND_HOUSE : currFundHouse,
-                fundData.FUND_TYPE : currFundType,
-                fundData.FUND_CODE_AMFI : parts[0],
-                fundData.FUND_NAME_AMFI : parts[3],
-                fundData.ISIN : parts[1],
-                assetData.ASSET_TYPE_KEY : fundData.ASSET_TYPE
+                fc.FUND_HOUSE : currFundHouse,
+                fc.FUND_TYPE : currFundType,
+                fc.FUND_CODE_AMFI : parts[0],
+                fc.FUND_NAME_AMFI : parts[3],
+                fc.ISIN : parts[1],
+                fc.ASSET_TYPE_KEY : fc.ASSET_TYPE
             })
         else:
             currFundHouse = line
