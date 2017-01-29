@@ -20,12 +20,18 @@ class Asset():
     def __init__(self,Id,client):
         self.client = client
         self.Id = str(Id)               # typecasting, in case it isn't a string
-        if(len(self.Id)==24):
+        if len(self.Id) == 24:
             self.mongoId = ObjectId(Id) # not used for assets not in assetMetaDataColl
+
+    # todo: either implement better check if mongoId should exist or at least centralize the logic
+    def assetInfo(self, keys=[]):
+        if len(self.Id) != 24:
+            raise "Must NOT invoke asset info on " + type(self)
+        return assetData.assetInfoById(self.client, self.mongoId, keys)
 
     # values for base assets are stored not derived
     def nav(self):
-        data = [v for v in assetData.valuesById(self.client, self.mongoId)]
+        data = assetData.valuesById(self.client, self.mongoId)
         values = [v.get(self.Id) for v in data]
         dates = [v[assetData.VALUE_DATE] for v in data]
         nav = pd.Series(values, dates)

@@ -62,15 +62,6 @@ def fundList(client, navDate=None):
         funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
     return funds
 
-def fundInfo(client, mongoId):
-    keys = dict([(key, 1) for key in FUND_ATTRIBUTES])
-    data = client.assetMetaData({dbclient.MONGO_ID: mongoId}, keys)
-    if(data.count() == 1):
-        data = data[0]
-    else:
-        data = {}
-    return data
-
 # todo: add test: Fund(fundIdFromAmfiCode(client,'125494'),client).fundInfo()[FUND_CODE_AMFI] == '125494'
 def fundIdFromAmfiCode(client, schemeCode):
     data = client.assetMetaData({assetData.ASSET_TYPE_KEY : ASSET_TYPE, \
@@ -98,7 +89,7 @@ def updateFundNAVOnDate(client, dt, valueMap):
 
 # only enrich missing data
 def enrichedFundInfo(client, mongoId):
-    info = fundInfo(client, mongoId)
+    info = assetData.assetInfoById(client, mongoId)
     enrichedInfo = {}
     nameParts = [part.strip() for part in info[FUND_NAME_AMFI].split('-')]
     # amfi info based enrichment logic
