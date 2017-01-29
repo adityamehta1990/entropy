@@ -30,7 +30,6 @@ class CompositeAsset(Asset):
     def holdingsQty(self):
         pass
 
-    # todo: uncomment after implementing holdings in portfolio and fund
     # @abstractmethod
     def holdings(self):
         pass

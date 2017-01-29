@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 from entropy.fund.fund import Fund
+from entropy.fund import fundData
 import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
@@ -28,6 +29,15 @@ class Portfolio(CompositeAsset):
 
     def holdingsIds(self):
         return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
+    
+    def holdings(self):
+        keys = [
+            fundData.ISIN,
+            fundData.ASSET_TYPE,
+            fundData.ASSET_CLASS,
+            fundData.STRATEGY_TYPE
+        ]
+        return assetData.assetInfo(self.client, self.holdingsIds(), keys=keys)
 
     # todo: add composite asset class which has exploded holdings
     # this is really holdings/investments
