@@ -27,7 +27,7 @@ class Portfolio(CompositeAsset):
         return Ts
 
     def holdingsIds(self):
-        return map(assetData.mongoIdFromId,list(set([txn[pc.ASSET_CODE] for txn in self.transactions()])))
+        return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
 
     # todo: add composite asset class which has exploded holdings
     # this is really holdings/investments

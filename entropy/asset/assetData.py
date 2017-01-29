@@ -12,19 +12,11 @@ ASSET_TYPE_KEY = 'assetType'
 def mongoIdFromId(Id):
     return ObjectId(Id)
 
-def assetInfoById(client, mongoId, keys=[]):
+def assetInfo(client, Ids, keys=[]):
+    Ids = map(mongoIdFromId,Ids)
     projection = dict([(key, 1) for key in keys])
-    data = client.assetMetaData({dbclient.MONGO_ID: mongoId}, projection)
-    if data.count() == 1:
-        data = data[0]
-    else:
-        raise "Could not find data for Id: " + str(mongoId)
-    return data
-
-def assetInfoByIds(client, mongoIds, keys=[]):
-    projection = dict([(key, 1) for key in keys])
-    data = [d for d in client.assetMetaData({dbclient.MONGO_ID: {"$in": mongoIds}}, projection)]
-    if len(data) != len(mongoIds):
+    data = [d for d in client.assetMetaData({dbclient.MONGO_ID: {"$in": Ids}}, projection)]
+    if len(data) != len(Ids):
         raise "Could not find meta data for provided Ids"
     return data
 
@@ -36,11 +28,8 @@ def valueDataOnDate(client, dt):
         raise "Found duplicate valuations for date: {}".format(dt.isoformat())
     return val[0]
 
-def valuesById(client, mongoId):
-    return [v for v in client.valueData({}, {VALUE_DATE: 1, Id: 1, dbclient.MONGO_ID: 0})]
-
-def valuesByIds(client, mongoIds):
-    keys = dict([(Id, 1) for Id in mongoIds])
+def values(client, Ids):
+    keys = dict([(Id, 1) for Id in Ids])
     keys.update({VALUE_DATE : 1, dbclient.MONGO_ID : 0})
     return [v for v in client.valueData({}, keys)]
 

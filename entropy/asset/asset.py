@@ -12,15 +12,12 @@ from entropy.asset import assetData
 class Asset():
     # every asset must have the following:
     client = None   # db client
-    mongoId = None  # mongoID for assets in assetMetaDataColl
     Id = None       # unique ID for all assets, MUST be a hexstring
     isCompositeAsset = False
 
     def __init__(self,Id,client):
         self.client = client
         self.Id = str(Id)               # typecasting, in case it isn't a string
-        if self.isSavedAsset():
-            self.mongoId = assetData.mongoIdFromId(Id) # not used for assets not in assetMetaDataColl
 
     def isSavedAsset(self):
         return len(self.Id) == 24
@@ -28,15 +25,20 @@ class Asset():
     def assetInfo(self, keys=[]):
         if not self.isSavedAsset():
             raise "Must NOT invoke asset info on " + type(self)
-        return assetData.assetInfoById(self.client, self.mongoId, keys)
+        return assetData.assetInfo(self.client, [self.Id], keys)[0]
+
+    # retrives NAV stored in database
+    def _navFromIds(self,Ids):
+        data = assetData.values(self.client,Ids)
+        values = [dict([(Id,v.get(Id)) for Id in Ids]) for v in data]
+        dates = [v[assetData.VALUE_DATE] for v in data]
+        nav = pd.DataFrame(values, index=dates)
+        # todo: align it to daily after sorting?
+        return nav.sort_index() # caveat: don't drop na
 
     # values for base assets are stored not derived
     def nav(self):
-        data = assetData.valuesById(self.client, self.mongoId)
-        values = [v.get(self.Id) for v in data]
-        dates = [v[assetData.VALUE_DATE] for v in data]
-        nav = pd.Series(values, dates)
-        return nav.dropna().sort_index()
+        return self._navFromIds([self.Id])
     
     @abstractmethod
     def cashflow(self):

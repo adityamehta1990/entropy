@@ -24,15 +24,8 @@ class CompositeAsset(Asset):
     def holdingsIds(self):
         pass
     
-    # nav is a series and this is a df
-    # make both consistent and a share code
     def holdingsNav(self):
-        holdingsIds = map(str,self.holdingsIds())
-        data = assetData.valuesByIds(self.client,holdingsIds)
-        values = [dict([(Id,v.get(Id)) for Id in holdingsIds]) for v in data]
-        dates = [v[assetData.VALUE_DATE] for v in data]
-        nav = pd.DataFrame(values, index=dates)
-        return nav.sort_index() # caveat: don't drop na
+        return self._navFromIds(self.holdingsIds())
         
     def holdingsQty(self):
         pass
