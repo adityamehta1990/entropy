@@ -51,19 +51,19 @@ def nextMarketClose(dt):
         weekdayAdj = 7 - dt.weekday()
     else:
         weekdayAdj = 0
-    return datetime(dt.year, dt.month, dt.day + weekdayAdj, MARKET_CLOSE_HOUR);
+    return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR) + timedelta(days=weekdayAdj);
 
 # regular week dates
-def regularWeekDates(startDate,endDate=datetime.today()):
+def regularDates(startDate,endDate=datetime.today()):
     start = marketCloseFromDate(startDate)
     end = marketCloseFromDate(endDate)
     dates = pd.DatetimeIndex(freq='D', start=start, end=end)
     return [ d for d in dates if d.weekday() < 5 ] # Num Weekday: Monday = 0, Sunday = 6
 
-def alignToRegularWeekDates(df,method=None):
+def alignToRegularDates(df,method=None):
     if len(df) == 0:
         return df
-    return df.reindex(index=regularWeekDates(df.index[0],df.index[-1]),method=method)
+    return df.reindex(index=regularDates(df.index[0],df.index[-1]),method=method)
 
 # todo: implement
 def _dailyAgg(df,aggFunc):

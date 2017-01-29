@@ -41,5 +41,25 @@ T2 = [
 
 df1 = dfFromTable(T1);
 df2 = dfFromTable(T2);
-df3 = utils.alignToRegularWeekDates(utils.dailySum(df1))
+df3 = utils.alignToRegularDates(utils.dailySum(df1))
 assert df3.equals(df2)
+
+# Test basic functionality
+
+T1 = [
+    [ "Date",       "Hour", "Value 2",  "Value 1",   "Value 3", ],
+    [ "20170101",   0,      7,          E,           3,         ],
+    [ "20170103",   0,      1,          3,           1,         ],
+    [ "20170104",   0,      3,          E,           6,         ],
+];
+
+T2 = [
+    [ "Date",       "Hour", "Value 1",  "Value 2",   ],
+    [ "20170101",   0,      3,          4            ],
+    [ "20170102",   0,      1,          1,           ],
+    [ "20170103",   0,      3,          E            ],
+    [ "20170104",   0,      3,          E            ],
+];
+
+df1 = dfFromTable(T1);
+df2 = dfFromTable(T2);

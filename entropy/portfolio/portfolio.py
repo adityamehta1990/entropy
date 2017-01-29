@@ -1,10 +1,11 @@
 import datetime
 import pandas as pd
 from entropy.fund.fund import Fund
-from entropy.fund import fundData
+import entropy.fund.constants as fc
 import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
+from entropy.utils import utils
 
 class Portfolio(CompositeAsset):
 
@@ -32,55 +33,29 @@ class Portfolio(CompositeAsset):
     
     def holdings(self):
         keys = [
-            fundData.ISIN,
-            fundData.ASSET_TYPE,
-            fundData.ASSET_CLASS,
-            fundData.STRATEGY_TYPE
+            fc.ISIN,
+            fc.ASSET_TYPE,
+            fc.ASSET_CLASS,
+            fc.STRATEGY_TYPE
         ]
         return assetData.assetInfo(self.client, self.holdingsIds(), keys=keys)
-
-    # todo: add composite asset class which has exploded holdings
-    # this is really holdings/investments
-    def aggregateTxns(self):
+    
+    def holdingsCFs(self):
         txns = pd.DataFrame(self.transactions())
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
-        quantity = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
+        cf.columns.name = None
+        return utils.dailySum(cf)
+    
+    def holdingsQty(self):
+        txns = pd.DataFrame(self.transactions())
+        qty = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
+        qty.index.name = None
+        # todo: only temporarily compute by CFs, remove this line later
+        qty = self.holdingsCFs() / self.holdingsNav()
+        return utils.alignToRegularDates(utils.dailySum(qty).cumsum()).fillna(method='ffill')
+    
+    def holdingsAUM(self):
+        return self.holdingsQty() * self.holdingsNav()
         
-        # first aggregate qty and cf by date+schemeCode to handle multiple txns on a date
-        aggTxns = txns.groupby(by=[pc.TXN_DATE, pc.ASSET_CODE]) \
-            .agg({pc.TXN_CASHFLOW : sum, pc.TXN_QUANTITY : sum})
-        cumAggTxns = aggTxns.groupby(level=pc.ASSET_CODE) \
-            .cumsum() \
-            .rename(columns={pc.TXN_CASHFLOW : 'cum_cashflow', pc.TXN_QUANTITY : 'cum_quantity'})
-        # concat cum by index and reset to date index
-        return pd.concat([aggTxns, cumAggTxns], axis=1).reset_index(level=pc.ASSET_CODE)
-
-    # actual market value of portfolio
-    def marketValue(self):
-        aggTxns = self.aggregateTxns()
-        # front fill by padding so that there are only leading NAs
-        qty = aggTxns.pivot(columns=pc.ASSET_CODE, values='cum_quantity') \
-            .fillna(method='pad')
-        # generate empty mv curve from first txn to today
-        index = pd.DatetimeIndex(freq='D', start=qty.first_valid_index(), end=datetime.datetime.today())
-        mv = pd.Series(index=index).fillna(0)
-        qty = qty.reindex(index=index, method='pad').fillna(0) # now fillna zero for initial period
-        # add conditions here based on asset type. for now all assets are funds
-        for (assetCode, assetQty) in qty.iteritems():
-            assetValue = Fund(assetCode, self.client).nav()
-            # dont fillna here, if fund nav is missing, it should yield NaN
-            mv = mv.add(assetQty * assetValue)
-        return mv.dropna()
-
-    # portfolio value if you had invested one rupee at the start
-    # and received the same returns. basically compounded at TWRR
     def nav(self):
-        mv = self.marketValue()
-        ts = mv - self.cashflow().reindex(mv.index).fillna(0)
-        # only first value will be NaN because of the shift
-        return (ts / mv.shift(1)).fillna(1).cumprod()
-
-    # todo: add options for groupby, cumulative and send back to FE
-    def cashflow(self):
-        aggTxns = self.aggregateTxns()
-        return pd.Series(aggTxns.groupby(level=pc.TXN_DATE).sum().cashflow)
+        return self.holdingsAUM().sum(axis=1).to_frame(name=self.Id)
