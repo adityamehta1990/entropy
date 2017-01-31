@@ -24,10 +24,6 @@ def localizeToIST(dt):
     ist = timezone('Asia/Kolkata')
     return ist.localize(dt)
 
-def addToDate(date,deltaInDays):
-    return date + datetime.timedelta(days=deltaInDays)
-    return date + datetime.timedelta(days=deltaInDays)
-
 def lastNonNa(a):
     ind = np.where(~np.isnan(a))[0]
     if len(ind) == 0:
@@ -43,15 +39,17 @@ def marketCloseFromDate(dt):
     return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR);
 
 def nextMarketClose(dt):
-    if dt > marketCloseFromDate(dt):
-        dt = dt + timedelta(days=1)
-    # Yes, I know ( max( dt.weekday(), 4 ) - 4 ) gives the same as following,
-    # But try explaining that to your grandmonther
-    if dt.weekday() >= 5:
-        weekdayAdj = 7 - dt.weekday()
+    close = marketCloseFromDate(dt)
+    if dt <= close:
+        nextClose = close
+    else:
+        nextClose = close + timedelta(days=1)
+    # Note: ( max( dt.weekday(), 4 ) - 4 ) gives the same as following
+    if nextClose.weekday() >= 5:
+        weekdayAdj = 7 - nextClose.weekday()
     else:
         weekdayAdj = 0
-    return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR) + timedelta(days=weekdayAdj);
+    return nextClose + timedelta(days=weekdayAdj)
 
 # regular week dates
 def regularDates(startDate,endDate=datetime.today()):
@@ -64,6 +62,9 @@ def alignToRegularDates(df,method=None):
     if len(df) == 0:
         return df
     return df.reindex(index=regularDates(df.index[0],df.index[-1]),method=method)
+
+def dropInitialNa(df):
+    return df[df.first_valid_index():]
 
 # todo: implement
 def _dailyAgg(df,aggFunc):

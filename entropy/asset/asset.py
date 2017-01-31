@@ -36,7 +36,7 @@ class Asset():
         dates = [v[ac.VALUE_DATE] for v in data]
         nav = pd.DataFrame(values, index=dates)
         # todo: align it to daily after sorting?
-        return utils.alignToRegularDates(nav.sort_index()) # caveat: don't drop na
+        return utils.dropInitialNa(utils.alignToRegularDates(nav.sort_index()))
 
     # values for base assets are stored not derived
     def nav(self):

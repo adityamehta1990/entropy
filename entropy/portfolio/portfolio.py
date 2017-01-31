@@ -55,7 +55,7 @@ class Portfolio(CompositeAsset):
         return utils.alignToRegularDates(utils.dailySum(qty).cumsum()).fillna(method='ffill')
     
     def holdingsAUM(self):
-        return self.holdingsQty() * self.holdingsNav()
+        return utils.dropInitialNa(self.holdingsQty() * self.holdingsNav())
         
     def nav(self):
         return self.holdingsAUM().sum(axis=1).to_frame(name=self.Id)
