@@ -35,12 +35,7 @@ def updateFundInfo(client, Id, fundInfo):
 
 # map values from amfi codes to internal IDs and update for given date
 def updateFundNAVOnDate(client, dt, valueMap):
-    fundCodeMap = client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE}, {fc.FUND_CODE_AMFI:1})
-    newValueMap = {}
-    for fund in fundCodeMap:
-        if valueMap.get(fund[fc.FUND_CODE_AMFI]) is not None:
-            newValueMap[str(fund[dbclient.MONGO_ID])] = valueMap[fund[fc.FUND_CODE_AMFI]]
-    return assetData.updateValuesOnDate(client, dt, dict(newValueMap))
+    return assetData.updateValuesOnDate(client, dt, valueMap, fc.ASSET_TYPE, fc.FUND_CODE_AMFI)
 
 # only enrich missing data
 def enrichedFundInfo(client, Id):
