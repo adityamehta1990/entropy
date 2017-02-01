@@ -19,18 +19,18 @@ class Portfolio(CompositeAsset):
 
     def isSavedAsset(self):
         return False
-    
+
     def transactions(self):
         data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id})
         if data.count() == 1:
-            Ts = data[0][pc.TRANSACTIONS]
+            ts = data[0][pc.TRANSACTIONS]
         else:
-            Ts = []
-        return Ts
+            ts = []
+        return ts
 
     def holdingsIds(self):
         return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
-    
+
     def holdings(self):
         keys = [
             fc.ISIN,
@@ -39,13 +39,13 @@ class Portfolio(CompositeAsset):
             fc.STRATEGY_TYPE
         ]
         return assetData.assetInfo(self.client, self.holdingsIds(), keys=keys)
-    
+
     def holdingsCFs(self):
         txns = pd.DataFrame(self.transactions())
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
         cf.columns.name = None
         return utils.dailySum(cf)
-    
+
     def holdingsQty(self):
         txns = pd.DataFrame(self.transactions())
         qty = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
@@ -53,9 +53,9 @@ class Portfolio(CompositeAsset):
         # todo: only temporarily compute by CFs, remove this line later
         qty = self.holdingsCFs() / self.holdingsNav()
         return utils.alignToRegularDates(utils.dailySum(qty).cumsum()).fillna(method='ffill')
-    
+
     def holdingsAUM(self):
         return utils.dropInitialNa(self.holdingsQty() * self.holdingsNav())
-        
+
     def nav(self):
         return self.holdingsAUM().sum(axis=1).to_frame(name=self.Id)

@@ -24,19 +24,19 @@ def localizeToIST(dt):
     ist = timezone('Asia/Kolkata')
     return ist.localize(dt)
 
-def lastNonNa(a):
-    ind = np.where(~np.isnan(a))[0]
+def lastNonNa(arr):
+    ind = np.where(~np.isnan(arr))[0]
     if len(ind) == 0:
         return np.NaN
     else:
-        return a[ind[-1]]
+        return arr[ind[-1]]
 
 # parse ISO date string to datetime
 def dateParser(dateStr):
     return parse(dateStr)
 
 def marketCloseFromDate(dt):
-    return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR);
+    return datetime(dt.year, dt.month, dt.day, MARKET_CLOSE_HOUR)
 
 def nextMarketClose(dt):
     close = marketCloseFromDate(dt)
@@ -52,42 +52,42 @@ def nextMarketClose(dt):
     return nextClose + timedelta(days=weekdayAdj)
 
 # regular week dates
-def regularDates(startDate,endDate=datetime.today()):
+def regularDates(startDate, endDate=datetime.today()):
     start = marketCloseFromDate(startDate)
     end = marketCloseFromDate(endDate)
     dates = pd.DatetimeIndex(freq='D', start=start, end=end)
-    return [ d for d in dates if d.weekday() < 5 ] # Num Weekday: Monday = 0, Sunday = 6
+    return [d for d in dates if d.weekday() < 5] # Num Weekday: Monday = 0, Sunday = 6
 
-def alignToRegularDates(df,method=None):
+def alignToRegularDates(df, method=None):
     if len(df) == 0:
         return df
-    return df.reindex(index=regularDates(df.index[0],df.index[-1]),method=method)
+    return df.reindex(index=regularDates(df.index[0], df.index[-1]), method=method)
 
 def dropInitialNa(df):
     return df[df.first_valid_index():]
 
 # todo: implement
-def _dailyAgg(df,aggFunc):
+def _dailyAgg(df, aggFunc):
     df['nextMarketClose'] = df.apply(lambda r: nextMarketClose(r.name), axis=1)
     df = df.groupby('nextMarketClose').aggregate(aggFunc)
     df.index.name = None
     return df
 
 def dailyClose(df):
-    return _dailyAgg(df,lastNonNa)
+    return _dailyAgg(df, lastNonNa)
 
 def dailySum(df):
-    return _dailyAgg(df,np.sum)
-    
-def json( data ):
-    return( jsonify( { JSON_KEY : data } ) )
+    return _dailyAgg(df, np.sum)
 
-def ts2dict( ts ):
+def json(data):
+    return jsonify({JSON_KEY : data})
+
+def ts2dict(ts):
     ts = ts.dropna()
-    return( { DATES_KEY : list( ts.index ), VALUES_KEY : list( ts.values ) })
+    return({DATES_KEY : list(ts.index), VALUES_KEY : list(ts.values)})
 
-def dict2ts( dict ):
-    return( pd.Series( dict[ VALUES_KEY ], index=dict[ DATES_KEY ] ) )
+def dict2ts(dct):
+    return pd.Series(dct[VALUES_KEY], index=dct[DATES_KEY])
 
 # set this on the flask.json_encoder to encode dates in isoformat
 class customJSONEncoder(JSONEncoder):

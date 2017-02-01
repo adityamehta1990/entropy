@@ -5,7 +5,7 @@ from entropy.utils import utils
 from entropy.portfolio import portfolioData
 from entropy.portfolio.portfolio import Portfolio
 
-portfolio_api = Blueprint('portfolio_api',__name__)
+portfolio_api = Blueprint('portfolio_api', __name__)
 client = dbclient.MClient()
 
 @portfolio_api.route('/client/<clientName>')
@@ -13,10 +13,10 @@ def getClientPortfolios(clientName):
     return utils.json(portfolioData.clientPortfolios(client, clientName))
 
 @portfolio_api.route('/<portfolioId>')
-def getPortfolio( portfolioId ):
+def getPortfolio(portfolioId):
     return utils.json(Portfolio(portfolioId, client).portfolioData())
 
-@portfolio_api.route('/new',methods=['POST'])
+@portfolio_api.route('/new', methods=['POST'])
 def addPortfolio():
     clientName = request[portfolioData.CLIENT_NAME].strip()
     portfolioName = request[portfolioData.PORTFOLIO_NAME].strip()
@@ -27,7 +27,7 @@ def addPortfolio():
 def getPortfolioTransactions(portfolioId):
     return utils.json(Portfolio(portfolioId, client).transactions())
 
-@portfolio_api.route('/<portfolioId>/transaction/new',methods=['POST'])
+@portfolio_api.route('/<portfolioId>/transaction/new', methods=['POST'])
 def addTransaction(portfolioId):
     data = request.get_json()
     ack = portfolioData.addTransaction(client, portfolioId, data[portfolioData.ASSET_CODE],

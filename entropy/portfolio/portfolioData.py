@@ -55,7 +55,8 @@ def addTransaction(client, portfolioId, assetId, schemeName, cashflow, quantity,
     return client.updatePortfolio({pc.PORTFOLIO_ID : portfolioId}, {pc.TRANSACTIONS : Ts})
 
 def removeTransaction(client, portfolioId, transactionId):
-    Ts = [txn for txn in Portfolio(portfolioId, client).transactions() if txn.get(pc.TRANSACTION_ID) != transactionId]
+    Ts = [txn for txn in Portfolio(portfolioId, client).transactions() \
+    if txn.get(pc.TRANSACTION_ID) != transactionId]
     return client.updatePortfolio({pc.PORTFOLIO_ID : portfolioId}, {pc.TRANSACTIONS : Ts})
 
 def removeAllTransactions(client, portfolioId):

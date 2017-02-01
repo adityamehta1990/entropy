@@ -17,13 +17,13 @@ PERIOD_TO_DAYS = {
 
 # 3Y -> ('Y',3)
 def parseWindow(window):
-    for freq in PERIOD_TO_DAYS.keys():
+    for freq in PERIOD_TO_DAYS:
         if window.endswith(freq):
-            periods = int(window.replace(freq,''))
+            periods = int(window.replace(freq, ''))
             break
     else:
-        raise Exception( 'Unknown frequency in window {}'.format(window) )
-    return (freq,periods)
+        raise Exception('Unknown frequency in window {}'.format(window))
+    return (freq, periods)
 
 # return in rolling window
 def rollingReturn(nav,window):
