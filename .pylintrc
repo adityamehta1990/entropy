@@ -3,10 +3,6 @@
 # Specify a configuration file.
 #rcfile=
 
-# Python code to execute, usually for sys.path manipulation such as
-# pygtk.require().
-init-hook='import sys; sys.path.append("/Users/nitish/Documents/Projects/entropy/server")'
-
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
 ignore=CVS
