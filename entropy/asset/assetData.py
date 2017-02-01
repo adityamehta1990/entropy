@@ -35,9 +35,15 @@ def valuesByIds(client, Ids):
 def availableValueDates(client):
     return [dt[ac.VALUE_DATE] for dt in client.valueData({}, {ac.VALUE_DATE : 1, dbclient.MONGO_ID : 0})]
 
-def updateValuesOnDate(client, dt, valueMap):
-    valueMap[ac.VALUE_DATE] = utils.marketCloseFromDate(dt)
-    ack = client.updateValueData({ac.VALUE_DATE : dt}, valueMap)
+def updateValuesOnDate(client, dt, valueMap, assetType, assetKey):
+    assetCodeMap = client.assetMetaData({ac.ASSET_TYPE_KEY: assetType}, {assetKey:1})
+    dt = utils.marketCloseFromDate(dt)
+    newValueMap = {}
+    for asset in assetCodeMap:
+        if valueMap.get(asset[assetKey]) is not None:
+            newValueMap[str(asset[dbclient.MONGO_ID])] = valueMap[asset[assetKey]]
+    newValueMap[ac.VALUE_DATE] = dt
+    ack = client.updateValueData({ac.VALUE_DATE: dt}, newValueMap)
     return ack
 
 def updateValuesByIds(client, Id, ts):
