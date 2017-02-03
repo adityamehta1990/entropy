@@ -34,7 +34,7 @@ class Portfolio(CompositeAsset):
     def holdings(self):
         keys = [
             fc.ISIN,
-            fc.ASSET_TYPE,
+            fc.ASSET_TYPE_FUND,
             fc.ASSET_CLASS,
             fc.STRATEGY_TYPE
         ]

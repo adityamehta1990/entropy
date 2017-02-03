@@ -7,7 +7,7 @@ import entropy.fund.constants as fc
 
 def fundList(client, navDate=None):
     keys = dict([(key, 1) for key in fc.FUND_ATTRIBUTES])
-    funds = [f for f in client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE}, keys)]
+    funds = [f for f in client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND}, keys)]
     if navDate is not None:
         vals = assetData.valuesOnDate(client, navDate)
         funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
@@ -15,7 +15,7 @@ def fundList(client, navDate=None):
 
 # todo: add test: Fund(fundIdFromAmfiCode(client,'125494'),client).fundInfo()[FUND_CODE_AMFI] == '125494'
 def fundIdFromAmfiCode(client, amfiCode):
-    data = client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE, \
+    data = client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND, \
                                  fc.FUND_CODE_AMFI : amfiCode}, {fc.FUND_CODE_AMFI : 1})
     assert data.count() == 1, "Invalid amfi code"
     return str(data[0][dbclient.MONGO_ID])
@@ -35,7 +35,7 @@ def updateFundInfo(client, Id, fundInfo):
 
 # map values from amfi codes to internal IDs and update for given date
 def updateFundNAVOnDate(client, dt, valueMap):
-    return assetData.updateValuesOnDate(client, dt, valueMap, fc.ASSET_TYPE, fc.FUND_CODE_AMFI)
+    return assetData.updateValuesOnDate(client, dt, valueMap, fc.ASSET_TYPE_FUND, fc.FUND_CODE_AMFI)
 
 # only enrich missing data
 def enrichedFundInfo(client, Id):
