@@ -4,7 +4,7 @@ import zipfile
 import io
 import datetime
 from entropy.asset import assetData
-from entropy.utils import utils
+import entropy.utils.dateandtime as dtu
 
 # equity list with ISIN and industry. this is independent of provider
 # simply download the csv (top right), save and run <>
@@ -44,8 +44,8 @@ def updateStockVals(client, dt, df):
     valueMap = dict(zip(stockVals.SYMBOL, stockVals.CLOSE_PRICE))
     return assetData.updateValuesOnDate(client, dt, valueMap, "stock", "ticker")
 
-def updateHistDataFromNSE(client, startDate=utils.dateParser('20060401')):
-    dt  = datetime.datetime.today() - datetime.timedelta(days=1)
+def updateHistDataFromNSE(client, startDate=dtu.dateParser('20060401')):
+    dt = datetime.datetime.today() - datetime.timedelta(days=1)
     ack = True
     while dt != startDate:
         df = dailyDataFromNSE(dt)

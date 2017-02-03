@@ -2,7 +2,8 @@ import hashlib
 import datetime
 import entropy.portfolio.constants as pc
 from entropy.portfolio.portfolio import Portfolio
-from entropy.utils import utils
+import entropy.utils.dateandtime as dtu
+import entropy.utils.timeseries as tsu
 
 def clientPortfolios(client, clientName):
     portCols = dict([(key, 1) for key in [pc.PORTFOLIO_ID, pc.PORTFOLIO_NAME, pc.DATE_CREATED]])
@@ -16,7 +17,7 @@ def portfolioId(clientName, portfolioName):
     return Id.hexdigest()
 
 def newPortfolio(Id, clientName, portfolioName):
-    now = utils.localizeToIST(datetime.datetime.today())
+    now = dtu.localizeToIST(datetime.datetime.today())
     return({
         pc.PORTFOLIO_ID : Id,
         pc.CLIENT_NAME : clientName,

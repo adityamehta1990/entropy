@@ -1,6 +1,5 @@
-import datetime
 from entropy.db import dbclient
-from entropy.utils import utils
+import entropy.utils.dateandtime as dtu
 import entropy.asset.constants as ac
 from bson.objectid import ObjectId
 
@@ -37,7 +36,7 @@ def availableValueDates(client):
 
 def updateValuesOnDate(client, dt, valueMap, assetType, assetKey):
     assetCodeMap = client.assetMetaData({ac.ASSET_TYPE_KEY: assetType}, {assetKey:1})
-    dt = utils.marketCloseFromDate(dt)
+    dt = dtu.marketCloseFromDate(dt)
     newValueMap = {}
     for asset in assetCodeMap:
         if valueMap.get(asset[assetKey]) is not None:

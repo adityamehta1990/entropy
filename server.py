@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
-from entropy.utils import utils
+import entropy.utils.io as io
 from entropy.fund.fundRoutes import fund_api
 from entropy.portfolio.portfolioRoutes import portfolio_api
 
@@ -8,7 +8,7 @@ from entropy.portfolio.portfolioRoutes import portfolio_api
 app = Flask(__name__)
 
 # global app settings
-app.json_encoder = utils.customJSONEncoder # centralized formatter for dates
+app.json_encoder = io.customJSONEncoder # centralized formatter for dates
 CORS(app,origins='*') # make this restrict to same host but any port
 app.config['PROPAGATE_EXCEPTIONS'] = True
 

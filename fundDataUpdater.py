@@ -1,6 +1,6 @@
 from entropy.datafeeds import fundDataFeed
 from entropy.db import dbclient
-import entropy.utils.utils as utils
+import entropy.utils.datetime as dtu
 
 client = dbclient.MClient()
 # update meta data
@@ -9,4 +9,4 @@ fundDataFeed.updateFundMetaData(client)
 fundDataFeed.updateDailyFundNAV(client)
 # historical
 # fundDataFeed.updateHistFundNAV(client) # for full history
-fundDataFeed.updateHistFundNAV(client,startDate=utils.dateParser('20140401'))
+fundDataFeed.updateHistFundNAV(client, startDate=dtu.dateParser('20140401'))

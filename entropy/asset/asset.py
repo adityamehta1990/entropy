@@ -5,7 +5,7 @@ import six
 from entropy import analytics
 from entropy.asset import assetData
 import entropy.asset.constants as ac
-from entropy.utils import utils
+import entropy.utils.timeseries as tsu
 
 # base class for any type of asset/investment - fund, stock, bond
 # this can implement returns and risk based analytics
@@ -36,7 +36,7 @@ class Asset():
         dates = [v[ac.VALUE_DATE] for v in data]
         nav = pd.DataFrame(values, index=dates)
         # todo: align it to daily after sorting?
-        return utils.dropInitialNa(utils.alignToRegularDates(nav.sort_index()))
+        return tsu.dropInitialNa(tsu.alignToRegularDates(nav.sort_index()))
 
     # values for base assets are stored not derived
     def nav(self):

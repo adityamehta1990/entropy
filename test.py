@@ -2,13 +2,14 @@
 import numpy as np
 import pandas as pd
 from datetime import timedelta
-from entropy.utils import utils
+import entropy.utils.datetime as dtu
+import entropy.utils.timeseries as tsu
 
 def dfFromTable(Table):
     header = Table[0]
     df = pd.DataFrame(Table[1:])
     df.columns = Table[0]
-    df.index = df.apply(lambda row: utils.dateParser(row['Date']) + timedelta(hours=row['Hour']), axis=1)
+    df.index = df.apply(lambda row: dtu.dateParser(row['Date']) + timedelta(hours=row['Hour']), axis=1)
     return df[ [ c for c in df.columns if c != 'Date' and c != 'Hour' ] ]
 
 # Test for daily close
@@ -26,7 +27,7 @@ T1 = [
     [ "20170202",   9,      E,          3           ],
     [ "20170202",   22,     4,          7           ],
     [ "20170203",   15,     E,          5           ],
-];
+]
 
 T2 = [
     [ "Date",       "Hour", "Value 1",  "Value 2"   ],
@@ -37,11 +38,11 @@ T2 = [
     [ "20170202",   14,      E,          8           ],
     [ "20170203",   14,      4,          7           ],
     [ "20170206",   14,      E,          5           ],
-];
+]
 
-df1 = dfFromTable(T1);
-df2 = dfFromTable(T2);
-df3 = utils.alignToRegularDates(utils.dailySum(df1))
+df1 = dfFromTable(T1)
+df2 = dfFromTable(T2)
+df3 = tsu.alignToRegularDates(utils.dailySum(df1))
 assert df3.equals(df2)
 
 # Test basic functionality
@@ -53,7 +54,7 @@ T1 = [
     [ "20170102",   0,      7,          E,           3,         ],
     [ "20170103",   0,      1,          3,           1,         ],
     [ "20170104",   0,      3,          E,           6,         ],
-];
+]
 
 T2 = [
     [ "Date",       "Hour", "Value 1",  "Value 2",   ],
@@ -61,7 +62,7 @@ T2 = [
     [ "20170102",   0,      1,          1,           ],
     [ "20170103",   0,      3,          E            ],
     [ "20170104",   0,      3,          E            ],
-];
+]
 
-df1 = dfFromTable(T1);
-df2 = dfFromTable(T2);
+df1 = dfFromTable(T1)
+df2 = dfFromTable(T2)

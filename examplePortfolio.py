@@ -1,7 +1,7 @@
 from entropy.db import dbclient
 import entropy.portfolio.portfolioData as po
 import entropy.portfolio.constants as pc
-import entropy.utils.utils as utils
+import entropy.utils.datetime as dtu
 import datetime
 import entropy.fund.fundData as fundData
 from entropy.fund.fund import Fund
@@ -9,7 +9,7 @@ from entropy.portfolio.portfolio import Portfolio
 import pandas as pd
 
 client = dbclient.MClient()
-date = utils.dateParser('20150101')
+date = dtu.dateParser('20150101')
 fundList = fundData.fundList(client)
 
 # adding new portfolio, if it doesn't exist
@@ -38,7 +38,7 @@ for txn in Txns.itertuples():
     fund = Fund(fundData.fundIdFromAmfiCode(client,txn.schemeCode),client)
     po.addTransaction( \
         client, Id, fund.Id, fund.fundInfo()[fundData.FUND_NAME_AMFI], \
-        txn.cashFlow, 0, utils.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
+        txn.cashFlow, 0, dtu.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
      )
 
 # P = Portfolio(Id = Id,client=client)

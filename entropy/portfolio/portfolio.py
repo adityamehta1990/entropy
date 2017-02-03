@@ -44,7 +44,7 @@ class Portfolio(CompositeAsset):
         txns = pd.DataFrame(self.transactions())
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
         cf.columns.name = None
-        return utils.dailySum(cf)
+        return tsu.dailySum(cf)
 
     def holdingsQty(self):
         txns = pd.DataFrame(self.transactions())
@@ -52,10 +52,10 @@ class Portfolio(CompositeAsset):
         qty.index.name = None
         # todo: only temporarily compute by CFs, remove this line later
         qty = self.holdingsCFs() / self.holdingsNav()
-        return utils.alignToRegularDates(utils.dailySum(qty).cumsum()).fillna(method='ffill')
+        return tsu.alignToRegularDates(tsu.dailySum(qty).cumsum()).fillna(method='ffill')
 
     def holdingsAUM(self):
-        return utils.dropInitialNa(self.holdingsQty() * self.holdingsNav())
+        return tsu.dropInitialNa(self.holdingsQty() * self.holdingsNav())
 
     def nav(self):
         return self.holdingsAUM().sum(axis=1).to_frame(name=self.Id)

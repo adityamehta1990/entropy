@@ -3,7 +3,7 @@ import requests
 import datetime
 from entropy.fund import fundData
 import entropy.fund.constants as fc
-from entropy.utils import utils
+import entropy.utils.dateandtime as dtu
 from entropy.asset import assetData
 
 AMFI_DAILY_NAV_URL = 'http://portal.amfiindia.com/spages/NAV0.txt'
@@ -84,7 +84,7 @@ def updateDailyFundNAV(client):
 
 # this is a one time thing
 # amfi has data from 1st Apr 2006
-def updateHistFundNAV(client,startDate=utils.dateParser('20060401')):
+def updateHistFundNAV(client,startDate=dtu.dateParser('20060401')):
     # todo: check min updated date and use that
     # this will just refill everything
     dt  = datetime.datetime.today() - datetime.timedelta(days=2)
