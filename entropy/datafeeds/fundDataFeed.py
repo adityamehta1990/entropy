@@ -59,7 +59,7 @@ def fundDataFromAMFI():
                 fc.FUND_CODE_AMFI : parts[0],
                 fc.FUND_NAME_AMFI : parts[3],
                 fc.ISIN : parts[1],
-                fc.ASSET_TYPE_KEY : fc.ASSET_TYPE
+                fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND
             })
         else:
             currFundHouse = line
