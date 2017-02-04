@@ -36,6 +36,18 @@ def nextMarketClose(dt):
         weekdayAdj = 0
     return nextClose + timedelta(days=weekdayAdj)
 
+def prevMarketClose(dt):
+    close = marketCloseFromDate(dt)
+    if dt >= close:
+        prevClose = close
+    else:
+        prevClose = close - timedelta(days=1)
+    if prevClose.weekday() >= 5:
+        weekdayAdj = prevClose.weekday() - 4
+    else:
+        weekdayAdj = 0
+    return prevClose - timedelta(days=weekdayAdj)
+
 # regular week dates
 def regularDates(startDate, endDate=datetime.today()):
     start = marketCloseFromDate(startDate)
