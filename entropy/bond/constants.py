@@ -11,7 +11,7 @@ BOND_GROUP = 'group'
 FACE_VALUE = 'faceValue'
 ISIN = 'ISIN'
 INDUSTRY = 'industry'
-STOCK_CODE_BSE = "bseCode" # dont project in fund attributes, this is required only internally
+BOND_CODE_BSE = "bseCode" # dont project in fund attributes, this is required only internally
 ASSET_CLASS = 'assetClass'
 
 BOND_ATTRIBUTES = [TICKER, BOND_NAME, BOND_STATUS, BOND_GROUP, FACE_VALUE, ISIN, INDUSTRY, \

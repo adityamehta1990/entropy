@@ -2,3 +2,4 @@
 
 VALUE_DATE = 'valueDate'
 ASSET_TYPE_KEY = 'assetType'
+ASSET_CLASS = 'assetClass'

@@ -1,0 +1,71 @@
+bmName,assetClass,bmType,marketCap,sector
+Nifty 50,Equity,Broad,Large,Multi
+Nifty Next 50,Equity,Broad,Large,Multi
+Nifty 100,Equity,Broad,Large,Multi
+Nifty 200,Equity,Broad,Large,Multi
+Nifty 500,Equity,Broad,,Multi
+Nifty Midcap 50,Equity,Broad,Medium,Multi
+Nifty Free Float Midcap 100,Equity,Broad,Medium,Multi
+Nifty Free Float Smallcap 100,Equity,Broad,Small,Multi
+India VIX,Equity,Broad,,Multi
+Nifty Full Midcap 100,Equity,Broad,Medium,Multi
+Nifty Midcap 150,Equity,Broad,Medium,Multi
+Nifty MidSmallcap 400,Equity,Broad,,Multi
+Nifty Smallcap 50,Equity,Broad,Small,Multi
+Nifty Full Smallcap 100,Equity,Broad,Small,Multi
+Nifty Smallcap 250,Equity,Broad,Small,Multi
+Nifty Aditya Birla Group,Equity,Corporate Group,,Multi
+Nifty Tata Group,Equity,Corporate Group,,Multi
+Nifty Mahindra Group,Equity,Corporate Group,,Multi
+Nifty Tata Group 25% Cap,Equity,Corporate Group,,Multi
+Nifty 8-13 yr G-Sec,Debt,Fixed Income,,
+Nifty 10 yr Benchmark G-Sec,Debt,Fixed Income,,
+Nifty 10 yr Benchmark G-Sec (Clean Price),Debt,Fixed Income,,
+Nifty 4-8 yr G-Sec Index,Debt,Fixed Income,,
+Nifty 11-15 yr G-Sec Index,Debt,Fixed Income,,
+Nifty 15 yr and above G-Sec Index,Debt,Fixed Income,,
+Nifty Composite G-sec Index,Debt,Fixed Income,,
+Nifty 1D Rate Index,Debt,Fixed Income,,
+Nifty AAA Corporate Bond Index,Debt,Fixed Income,,
+Nifty Auto,Equity,Sectoral,,Auto
+Nifty Bank,Equity,Sectoral,,Banks
+Nifty Energy,Equity,Sectoral,,Energy
+Nifty Financial Services,Equity,Sectoral,,Financial Services
+Nifty FMCG,Equity,Sectoral,,FMCG
+Nifty IT,Equity,Sectoral,,IT
+Nifty Media,Equity,Sectoral,,Media
+Nifty Metal,Equity,Sectoral,,Metal
+Nifty Pharma,Equity,Sectoral,,Pharma
+Nifty PSU Bank,Equity,Sectoral,,PSU Banks
+Nifty Realty,Equity,Sectoral,,Infrastructure
+Nifty Private Bank,Equity,Sectoral,,
+Nifty50 Dividend Points,Equity,Strategy,,
+Nifty Dividend Opportunities 50,Equity,Strategy,,
+Nifty Low Volatility 50,Equity,Strategy,,
+Nifty Alpha 50,Equity,Strategy,,
+Nifty High Beta 50,Equity,Strategy,,
+Nifty50 USD,Equity,Strategy,,
+Nifty100 Equal Weight,Equity,Strategy,Large,
+Nifty50 Value 20,Equity,Strategy,Large,
+Nifty Growth Sectors 15,Equity,Strategy,,
+Nifty50 TR 1x Inverse,Equity,Strategy,,
+Nifty50 TR 2x Leverage,Equity,Strategy,,
+Nifty50 PR 1x Inverse,Equity,Strategy,,
+Nifty50 PR 2x Leverage,Equity,Strategy,,
+Nifty Quality 30,Equity,Strategy,,
+Nifty 50 Futures TR Index,Equity,Strategy,,
+Nifty 50 Arbitrage,Equity,Strategy,,
+Nifty 50 Futures Index,Equity,Strategy,,
+Nifty100 Low Volatility 30,Equity,Strategy,,
+Nifty MNC,Equity,Thematic,Large,
+Nifty India Consumption,Equity,Thematic,,
+Nifty Commodities,Equity,Thematic,,
+Nifty Infrastructure,Equity,Thematic,,
+Nifty PSE,Equity,Thematic,,
+Nifty Services Sector,Equity,Thematic,,
+Nifty50 Shariah,Equity,Thematic,Large,
+Nifty500 Shariah,Equity,Thematic,,
+Nifty100 Liquid 15,Equity,Thematic,Large,
+Nifty CPSE,Equity,Thematic,,
+Nifty Midcap Liquid 15,Equity,Thematic,Medium,
+Nifty Shariah 25,Equity,Thematic,Large,
