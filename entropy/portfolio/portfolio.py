@@ -5,7 +5,7 @@ import entropy.fund.constants as fc
 import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
-from entropy.utils import utils
+import entropy.utils.timeseries as tsu
 
 class Portfolio(CompositeAsset):
 
@@ -43,13 +43,13 @@ class Portfolio(CompositeAsset):
     def holdingsCFs(self):
         txns = pd.DataFrame(self.transactions())
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
-        cf.columns.name = None
+        cf.index.rename(None, inplace=True)
         return tsu.dailySum(cf)
 
     def holdingsQty(self):
         txns = pd.DataFrame(self.transactions())
         qty = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
-        qty.index.name = None
+        qty.index.rename(None, inplace=True)
         # todo: only temporarily compute by CFs, remove this line later
         qty = self.holdingsCFs() / self.holdingsNav()
         return tsu.alignToRegularDates(tsu.dailySum(qty).cumsum()).fillna(method='ffill')

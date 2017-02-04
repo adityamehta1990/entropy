@@ -1,6 +1,6 @@
 from entropy.datafeeds import fundDataFeed
 from entropy.db import dbclient
-import entropy.utils.datetime as dtu
+import entropy.utils.dateandtime as dtu
 
 client = dbclient.MClient()
 # update meta data

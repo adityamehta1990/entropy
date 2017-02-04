@@ -17,7 +17,7 @@ class Asset():
     Id = None       # unique ID for all assets, MUST be a hexstring
     isCompositeAsset = False
 
-    def __init__(self,Id,client):
+    def __init__(self, Id, client):
         self.client = client
         self.Id = str(Id)               # typecasting, in case it isn't a string
 
@@ -30,9 +30,9 @@ class Asset():
         return assetData.assetInfo(self.client, [self.Id], keys)[0]
 
     # retrives NAV stored in database
-    def _navFromIds(self,Ids):
-        data = assetData.valuesByIds(self.client,Ids)
-        values = [dict([(Id,v.get(Id)) for Id in Ids]) for v in data]
+    def _navFromIds(self, Ids):
+        data = assetData.valuesByIds(self.client, Ids)
+        values = [dict([(Id, v.get(Id)) for Id in Ids]) for v in data]
         dates = [v[ac.VALUE_DATE] for v in data]
         nav = pd.DataFrame(values, index=dates)
         # todo: align it to daily after sorting?
