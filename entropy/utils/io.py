@@ -30,7 +30,7 @@ class customJSONEncoder(JSONEncoder):
             if isinstance(obj, datetime):
                 # python does not really conform to ISO 8601
                 # it is not tz aware unless the TZ is explicitly set
-                serial = dtu.localizeToIST(obj).isoformat()
+                serial = dtu.localizeToTz(obj).isoformat()
                 return serial
             elif isinstance(obj, ObjectId):
                 serial = str(obj)

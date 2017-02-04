@@ -17,7 +17,7 @@ def portfolioId(clientName, portfolioName):
     return Id.hexdigest()
 
 def newPortfolio(Id, clientName, portfolioName):
-    now = dtu.localizeToIST(datetime.datetime.today())
+    now = dtu.localizeToTz(datetime.datetime.now())
     return({
         pc.PORTFOLIO_ID : Id,
         pc.CLIENT_NAME : clientName,

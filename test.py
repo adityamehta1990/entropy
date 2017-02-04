@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from datetime import timedelta
-import entropy.utils.datetime as dtu
+import entropy.utils.dateandtime as dtu
 import entropy.utils.timeseries as tsu
 
 def dfFromTable(Table):
@@ -42,7 +42,7 @@ T2 = [
 
 df1 = dfFromTable(T1)
 df2 = dfFromTable(T2)
-df3 = tsu.alignToRegularDates(utils.dailySum(df1))
+df3 = tsu.alignToRegularDates(tsu.dailySum(df1))
 assert df3.equals(df2)
 
 # Test basic functionality

@@ -4,17 +4,6 @@ import numpy as np
 import scipy
 import scipy.optimize
 
-# timeseries analysis of returns
-
-DAYS_IN_YEAR = 365
-PERIOD_TO_DAYS = {
-    'D' : 1,
-    'W' : 7,
-    'M' : 30,
-    'Q' : 90,
-    'Y' : 365
-}
-
 # 3Y -> ('Y',3)
 def parseWindow(window):
     for freq in PERIOD_TO_DAYS:

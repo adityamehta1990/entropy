@@ -4,15 +4,17 @@ from dateutil.parser import parse
 from pytz import timezone
 import pandas as pd
 import numpy as np
+import entropy.config as config
 
-# todo: Calendar
+# todo: calendar
+# todo: timezone
 
 # market close hour
 MARKET_CLOSE_HOUR = 14
 
-def localizeToIST(dt):
-    ist = timezone('Asia/Kolkata')
-    return ist.localize(dt)
+def localizeToTz(dt):
+    tz = timezone(config.TIME_ZONE)
+    return tz.localize(dt)
 
 # parse ISO date string to datetime
 def dateParser(dateStr):
