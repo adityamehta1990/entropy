@@ -41,7 +41,7 @@ def prevMarketClose(dt):
     else:
         prevClose = close - timedelta(days=1)
     if prevClose.weekday() >= 5:
-        weekdayAdj = 6 - prevClose.weekday()
+        weekdayAdj = prevClose.weekday() - 4
     else:
         weekdayAdj = 0
     return prevClose - timedelta(days=weekdayAdj)
