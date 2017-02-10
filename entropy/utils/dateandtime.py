@@ -5,6 +5,7 @@ from pytz import timezone
 import pandas as pd
 import numpy as np
 import entropy.config as config
+import entropy.constants as ec
 
 # todo: calendar
 # todo: timezone
@@ -29,12 +30,11 @@ def nextMarketClose(dt):
         nextClose = close
     else:
         nextClose = close + timedelta(days=1)
-    # Note: ( max( dt.weekday(), 4 ) - 4 ) gives the same as following
-    if nextClose.weekday() >= 5:
-        weekdayAdj = 7 - nextClose.weekday()
-    else:
-        weekdayAdj = 0
-    return nextClose + timedelta(days=weekdayAdj)
+    if config.CALENDAR == ec.CALENDAR_WEEKDAY:
+        # Note: ( max( dt.weekday(), 4 ) - 4 ) gives the same as following
+        if nextClose.weekday() >= 5:
+            nextClose += timedelta(days=7-nextClose.weekday())
+    return nextClose
 
 def prevMarketClose(dt):
     close = marketCloseFromDate(dt)
@@ -42,11 +42,10 @@ def prevMarketClose(dt):
         prevClose = close
     else:
         prevClose = close - timedelta(days=1)
-    if prevClose.weekday() >= 5:
-        weekdayAdj = prevClose.weekday() - 4
-    else:
-        weekdayAdj = 0
-    return prevClose - timedelta(days=weekdayAdj)
+    if config.CALENDAR == ec.CALENDAR_WEEKDAY:
+        if prevClose.weekday() >= 5:
+            prevClose -= timedelta(days=prevClose.weekday()-4)
+    return prevClose
 
 # regular week dates
 def regularDates(startDate, endDate=datetime.today()):

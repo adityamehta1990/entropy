@@ -18,14 +18,18 @@ JSON_KEY = "data"
 def json(data):
     return jsonify({JSON_KEY : data})
 
-def ts2dict(ts):
-    ts = ts.dropna()
-    # access and return the first column if there is only one
-    vals = list(ts.values) if ts.columns.size > 1 else list(ts.iloc[:, 0].values)
-    return({DATES_KEY: list(ts.index), VALUES_KEY: vals})
+def ts2dict(df):
+    # Alternative:
+    # return {DATES_KEY: list(df.index), VALUES_KEY: df.to_index('list')}
+    dct = df.to_dict('list')
+    dct[DATES_KEY] = list(df.index)
+    return dct
 
+# use this for _nav? Or just get rid of it.
 def dict2ts(dct):
-    return pd.Series(dct[VALUES_KEY], index=dct[DATES_KEY])
+    df = pd.DataFrame(dct).set_index(DATES_KEY)
+    df.index.rename(None, inplace=True)
+    return df
 
 def requestWithTries(url, params={}):
     counter = 3

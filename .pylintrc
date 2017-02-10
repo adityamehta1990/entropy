@@ -130,10 +130,10 @@ const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 const-name-hint=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 
 # Regular expression matching correct attribute names
-attr-rgx=_?_?[a-z][A-Za-z0-9]{1,30}$
+attr-rgx=_?_?[a-zA-Z][A-Za-z0-9]{1,30}$
 
 # Naming hint for attribute names
-attr-name-hint=_?_?[a-z][A-Za-z0-9]{1,30}$
+attr-name-hint=_?_?[a-zA-Z][A-Za-z0-9]{1,30}$
 
 # Regular expression matching correct argument names
 argument-rgx=_?_?[a-zA-Z][A-Za-z0-9]{1,30}$

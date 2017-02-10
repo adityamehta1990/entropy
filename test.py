@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import timedelta
 import entropy.utils.dateandtime as dtu
 import entropy.utils.timeseries as tsu
+import entropy.utils.io as io
 
 def dfFromTable(Table):
     header = Table[0]
@@ -43,7 +44,9 @@ T2 = [
 df1 = dfFromTable(T1)
 df2 = dfFromTable(T2)
 df3 = tsu.alignToRegularDates(tsu.dailySum(df1))
+
 assert df3.equals(df2)
+assert df1.equals(io.dict2ts(io.ts2dict(df1)))
 
 # Test basic functionality
 
@@ -66,3 +69,5 @@ T2 = [
 
 df1 = dfFromTable(T1)
 df2 = dfFromTable(T2)
+
+
