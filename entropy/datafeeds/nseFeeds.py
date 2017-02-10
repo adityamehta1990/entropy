@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 from entropy.asset import assetData
 import entropy.utils.dateandtime as dtu
-import entropy.utils.io as utilsIO
+import entropy.utils.webio as webio
 import entropy.benchmark.constants as bmc
 
 # equity list with ISIN and industry. this is independent of provider
@@ -39,7 +39,7 @@ def updateBenchmarkMetaData(client, filename='data/benchmarkMetaData.csv'):
 def bmLevelsFromNSE(dt):
     dtStr = dt.strftime("%d%m%Y")
     url = NSE_INDEX_LEVEL_URL + dtStr + ".csv"
-    csv = utilsIO.fileContentFromUrl(url)
+    csv = webio.fileContentFromUrl(url)
     df = pd.read_csv(csv)
     valueMap = dict(zip(df['Index Name'], df['Closing Index Value']))
     return valueMap
@@ -48,7 +48,7 @@ def bmLevelsFromNSE(dt):
 def dailyDataFromNSE(dt):
     dtStr = dt.strftime("%d%m%y")
     url = NSE_DAILY_DATA_URL + dtStr + ".zip"
-    unzip = utilsIO.unzippedFileFromUrl(url)
+    unzip = webio.unzippedFileFromUrl(url)
     filename = "Pd" + dtStr + ".csv"
     csv = unzip.open(filename)
     df = pd.read_csv(csv, skipinitialspace=True)

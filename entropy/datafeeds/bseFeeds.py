@@ -4,7 +4,7 @@ from entropy.asset import assetData
 import entropy.asset.constants as ac
 import entropy.stock.constants as sc
 import entropy.bond.constants as bc
-import entropy.utils.io as utilsIO
+import entropy.utils.webio as webio
 import entropy.utils.dateandtime as dtu
 
 # equity list with ISIN and industry. this is independent of provider
@@ -70,7 +70,7 @@ def updateBondMetaData(client, filename='data/ListOfScripsBond.csv'):
 def stockPricesFromBSE(dt):
     dtStr = dt.strftime("%d%m%y")
     url = BSE_STOCK_DATA_URL + dtStr + "_CSV.zip"
-    unzip = utilsIO.unzippedFileFromUrl(url)
+    unzip = webio.unzippedFileFromUrl(url)
     filename = "EQ" + dtStr + ".CSV"
     csv = unzip.open(filename)
     df = pd.read_csv(csv, skipinitialspace=True)
@@ -84,7 +84,7 @@ def stockPricesFromBSE(dt):
 def bondPricesFromBSE(dt):
     dtStr = dt.strftime("%d%m%Y")
     url = BSE_BOND_DATA_URL + dtStr + ".zip"
-    unzip = utilsIO.unzippedFileFromUrl(url)
+    unzip = webio.unzippedFileFromUrl(url)
     # todo: iterate over all files in zip (different types of bonds/debentures)
     filename = "fgroup" + dtStr + ".csv"
     csv = unzip.open(filename)

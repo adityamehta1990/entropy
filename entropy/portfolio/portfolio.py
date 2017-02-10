@@ -1,11 +1,10 @@
 import datetime
 import pandas as pd
-from entropy.fund.fund import Fund
 import entropy.fund.constants as fc
 import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
-from entropy.utils import utils
+import entropy.utils.timeseries as tsu
 
 class Portfolio(CompositeAsset):
 
