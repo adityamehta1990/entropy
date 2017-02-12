@@ -2,7 +2,7 @@ import re
 import datetime
 from entropy.fund import fundData
 import entropy.fund.constants as fc
-import entropy.utils.io as utilsIO
+import entropy.utils.webio as webio
 import entropy.utils.dateandtime as dtu
 
 AMFI_DAILY_NAV_URL = 'http://portal.amfiindia.com/spages/NAV0.txt'
@@ -14,9 +14,9 @@ def fundNAVFromAMFI(dt=datetime.datetime.today() - datetime.timedelta(days=1)):
     dtStr = dt.strftime('%d-%b-%Y')
     # compare date because we dont care about exact time
     if dt.date() == datetime.datetime.today().date() - datetime.timedelta(days=1):
-        resp = utilsIO.requestWithTries(AMFI_DAILY_NAV_URL)
+        resp = webio.requestWithTries(AMFI_DAILY_NAV_URL)
     else:
-        resp = utilsIO.requestWithTries(AMFI_HIST_NAV_URL, {'frmdt':dtStr})
+        resp = webio.requestWithTries(AMFI_HIST_NAV_URL, {'frmdt':dtStr})
     data = resp.text.splitlines()
     data = [line.strip().split(';') for line in data if line.find(';') >= 0 and line.endswith(dtStr)]
     # potentially use schema = data[0].split(';') to figure out below indexes
@@ -29,7 +29,7 @@ def fundNAVFromAMFI(dt=datetime.datetime.today() - datetime.timedelta(days=1)):
 def fundDataFromAMFI():
     # it looks like this has all funds that were ever sold
     # so need to call it only first time and when we want to update with new funds
-    resp = utilsIO.requestWithTries(AMFI_DAILY_NAV_URL)
+    resp = webio.requestWithTries(AMFI_DAILY_NAV_URL)
     data = resp.text.splitlines()
     # schema = data[0].split(';')
     data = [line.strip() for line in data[1:] if len(line.strip()) > 0]
