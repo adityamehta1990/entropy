@@ -4,14 +4,14 @@ import pandas as pd
 from datetime import timedelta
 import entropy.utils.dateandtime as dtu
 import entropy.utils.timeseries as tsu
-import entropy.utils.io as io
+import entropy.utils.webio as webio
 
 def dfFromTable(Table):
     header = Table[0]
     df = pd.DataFrame(Table[1:])
     df.columns = Table[0]
     df.index = df.apply(lambda row: dtu.dateParser(row['Date']) + timedelta(hours=row['Hour']), axis=1)
-    return df[ [ c for c in df.columns if c != 'Date' and c != 'Hour' ] ]
+    return df[[c for c in df.columns if c != 'Date' and c != 'Hour']]
 
 # Test for daily close
 E = np.NaN
@@ -46,7 +46,7 @@ df2 = dfFromTable(T2)
 df3 = tsu.alignToRegularDates(tsu.dailySum(df1))
 
 assert df3.equals(df2)
-assert df1.equals(io.dict2ts(io.ts2dict(df1)))
+assert df1.equals(webio.dict2ts(webio.ts2dict(df1)))
 
 # Test basic functionality
 
@@ -69,5 +69,3 @@ T2 = [
 
 df1 = dfFromTable(T1)
 df2 = dfFromTable(T2)
-
-

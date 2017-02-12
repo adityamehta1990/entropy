@@ -33,8 +33,8 @@ def updateFundInfo(Id):
 
 @fund_api.route('/nav/<Id>')
 def getFundNav(Id):
-    return webio.json(io.ts2dict(Fund(Id, client).nav()))
+    return webio.json(webio.ts2dict(Fund(Id, client).nav()))
 
 @fund_api.route('/return/<Id>/<window>')
 def getFundReturn(Id, window):
-    return webio.json(io.ts2dict(Fund(Id, client).rollingReturn(window)))
+    return webio.json(webio.ts2dict(Fund(Id, client).rollingReturn(window)))
