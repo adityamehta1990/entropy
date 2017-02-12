@@ -1,6 +1,7 @@
 from entropy.db import dbclient
 import entropy.portfolio.portfolioData as po
 import entropy.portfolio.constants as pc
+import entropy.fund.constants as fc
 import entropy.utils.dateandtime as dtu
 import datetime
 import entropy.fund.fundData as fundData
@@ -37,7 +38,7 @@ Txns = pd.DataFrame(Txns[1:],columns=Txns[0])
 for txn in Txns.itertuples():
     fund = Fund(fundData.fundIdFromAmfiCode(client,txn.schemeCode),client)
     po.addTransaction( \
-        client, Id, fund.Id, fund.fundInfo()[fundData.FUND_NAME_AMFI], \
+        client, Id, fund.Id, fund.fundInfo()[fc.FUND_NAME_AMFI], \
         txn.cashFlow, 0, dtu.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
      )
 

@@ -6,6 +6,8 @@ import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
 import entropy.utils.timeseries as tsu
+import numpy as np
+from entropy.analytics import analytics
 
 class Portfolio(CompositeAsset):
 
@@ -40,7 +42,7 @@ class Portfolio(CompositeAsset):
         ]
         return assetData.assetInfo(self.client, self.holdingsIds(), keys=keys)
 
-    def holdingsCFs(self):
+    def holdingsCF(self):
         txns = pd.DataFrame(self.transactions())
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
         cf.index.rename(None, inplace=True)
@@ -50,12 +52,30 @@ class Portfolio(CompositeAsset):
         txns = pd.DataFrame(self.transactions())
         qty = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
         qty.index.rename(None, inplace=True)
-        # todo: only temporarily compute by CFs, remove this line later
-        qty = self.holdingsCFs() / self.holdingsNav()
+        # todo: only temporarily compute by CF, remove this line later
+        # qty = self.holdingsCF() / self.holdingsNav()
         return tsu.alignToRegularDates(tsu.dailySum(qty).cumsum()).fillna(method='ffill')
 
     def holdingsAUM(self):
-        return tsu.dropInitialNa(self.holdingsQty() * self.holdingsNav())
+        hNav = self.holdingsNav()
+        hQty = self.holdingsQty().reindex(index=hNav.index, method='ffill')
+        return tsu.dropInitialNa(hQty * hNav)
+
+    def holdingsExposure(self):
+        return self.holdingsAUM().fillna(method='ffill').divide(self.nav().iloc[:, 0], axis='index')
+
+    # move to CompositeAsset class
+    def holdingsReturn(self):
+        return analytics.dailyReturn(self.holdingsNav())
+
+    def dailyReturn(self):
+        exposure = self.holdingsExposure().fillna(method='ffill')
+        return (exposure.shift() * self.holdingsReturn()).sum(axis=1).to_frame(name=self.Id)
 
     def nav(self):
-        return self.holdingsAUM().sum(axis=1).to_frame(name=self.Id)
+        hAUM = self.holdingsAUM()
+        nav = hAUM.fillna(method='ffill').sum(axis=1)
+        # nullifying when all fund prices as nulls - do we really have to?
+        # is there a better way?
+        nav[hAUM.sum(axis=1).isnull()] = np.nan
+        return nav.to_frame(name=self.Id)

@@ -1,3 +1,5 @@
+"""Portfolio Constants"""
+
 # portfolio schema
 CLIENT_NAME = "clientName"
 PORTFOLIO_ID = "portfolioId"

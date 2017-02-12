@@ -2,12 +2,14 @@
 
 import entropy.constants as ec
 import entropy.config as config
+import numpy as np
 
+# same as pandas frequency constants
 DAY = 'D'
 WEEK = 'W'
 MONTH = 'M'
 QUARTER = 'Q'
-YEAR = 'D'
+YEAR = 'A'
 
 SINCE_INCEPTION = 'SI'
 
@@ -27,3 +29,24 @@ DAYS_IN_PERIOD = {
         YEAR : 252,
     }
 }[config.CALENDAR]
+
+SUM = "sum"
+PROD = "product"
+MIN = "minumum"
+MAX = "maximum"
+AVG = "average"
+STD = "standard deviation"
+VAR = "variance"
+CORR = "correlation"
+COV = "covariance"
+MSUM = "multiplicative sum"
+
+METHOD = {
+    SUM : np.nansum,
+    PROD : np.nanprod,
+    AVG : np.nanmean,
+    VAR : np.nanvar,
+    STD : np.nanstd,
+    MIN : np.nanmin,
+    MAX : np.nanmax,
+}

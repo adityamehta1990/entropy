@@ -6,6 +6,7 @@ from entropy import analytics
 from entropy.asset import assetData
 import entropy.asset.constants as ac
 import entropy.utils.timeseries as tsu
+from entropy.analytics import analytics
 
 # base class for any type of asset/investment - fund, stock, bond
 # this can implement returns and risk based analytics
@@ -31,11 +32,11 @@ class Asset():
 
     # retrives NAV stored in database
     def _navFromIds(self, Ids):
+        # todo: have a start and end date?
         data = assetData.valuesByIds(self.client, Ids)
         values = [dict([(Id, v.get(Id)) for Id in Ids]) for v in data]
         dates = [v[ac.VALUE_DATE] for v in data]
         nav = pd.DataFrame(values, index=dates)
-        # todo: align it to daily after sorting?
         return tsu.dropInitialNa(tsu.alignToRegularDates(nav.sort_index()))
 
     # values for base assets are stored not derived
@@ -46,9 +47,8 @@ class Asset():
     def cashflow(self):
         pass
 
-    # daily return curve, optionally adjusted by cashflows
-    def returns(self):
-        return analytics.rollingReturn(self.nav(),'1D').fillna(0)
+    def dailyReturn(self):
+        return analytics.dailyReturn(self.nav())
 
     # optional: can add total returns for dividends (cashflow)
 

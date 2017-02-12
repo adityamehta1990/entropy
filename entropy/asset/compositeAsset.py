@@ -26,7 +26,7 @@ class CompositeAsset(Asset):
     
     def holdingsNav(self):
         return self._navFromIds(self.holdingsIds())
-        
+
     def holdingsQty(self):
         pass
 

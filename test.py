@@ -67,7 +67,7 @@ T2 = [
     [ "20170104",   0,      3,          E            ],
 ]
 
-df1 = dfFromTable(T1)
-df2 = dfFromTable(T2)
+# df1 = dfFromTable(T1)
+# df2 = dfFromTable(T2)
 
 
