@@ -1,16 +1,15 @@
 import pandas as pd
 import re
+from fuzzywuzzy import fuzz
 from entropy.db import dbclient
 from entropy.asset import assetData
 import entropy.fund.constants as fc
+import entropy.asset.constants as ac
 # define schema, possible values, etc
 
 def fundList(client, navDate=None):
     keys = dict([(key, 1) for key in fc.FUND_ATTRIBUTES])
-    funds = [f for f in client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND}, keys)]
-    if navDate is not None:
-        vals = assetData.valuesOnDate(client, navDate)
-        funds = [f for f in funds if vals.get(str(f[dbclient.MONGO_ID])) is not None]
+    funds = assetData.assetList(client, fc.ASSET_TYPE_FUND, keys, navDate)
     return funds
 
 # todo: add test: Fund(fundIdFromAmfiCode(client,'125494'),client).fundInfo()[FUND_CODE_AMFI] == '125494'

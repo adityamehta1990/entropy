@@ -6,8 +6,19 @@ from bson.objectid import ObjectId
 def mongoIdFromId(Id):
     return ObjectId(Id)
 
-def assetInfo(client, Ids, keys=[]):
-    Ids = list(map(mongoIdFromId, Ids))
+def assetList(client, assetType=None, keys=ac.ASSET_ATTRIBUTES, navDate=None):
+    query = {ac.ASSET_TYPE_KEY: assetType} if assetType is not None else {}
+    projection = dict([(key, 1) for key in keys])
+    assets = [a for a in client.assetMetaData(query, projection)]
+    if navDate is not None:
+        vals = valuesOnDate(client, navDate)
+        assets = [a for a in assets if vals.get(str(a[dbclient.MONGO_ID])) is not None]
+    return assets
+
+def assetInfo(client, Ids, keys=ac.ASSET_ATTRIBUTES):
+    if isinstance(Ids, str):
+        Ids = [Ids]
+    Ids = [mongoIdFromId(Id) for Id in Ids]
     projection = dict([(key, 1) for key in keys])
     data = [d for d in client.assetMetaData({dbclient.MONGO_ID: {"$in": Ids}}, projection)]
     if len(data) != len(Ids):

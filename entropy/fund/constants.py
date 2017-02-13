@@ -18,8 +18,9 @@ HAS_DIVIDEND = 'hasDividend'
 DIVIDEND_PERIOD = 'hasDividend'
 IS_DIRECT = 'isDirect'
 
-FUND_ATTRIBUTES = [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE, ISIN, ASSET_TYPE_KEY, \
-                FUND_NAME, ASSET_CLASS, STRATEGY_TYPE, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
+FUND_ATTRIBUTES = ac.ASSET_ATTRIBUTES + \
+                [FUND_NAME_AMFI, FUND_CODE_AMFI, FUND_HOUSE, FUND_TYPE, ISIN, \
+                FUND_NAME, IS_OPEN_ENDED, HAS_DIVIDEND, DIVIDEND_PERIOD, IS_DIRECT]
 
 # allowed values
 ASSET_TYPE_FUND = "fund"
@@ -42,6 +43,6 @@ FUND_ATTRIBUTES_DEBT = {
     'underlier' : ['gilt', 'corp', 'liquid']
 }
 
-FUND_TYPE_CHOICES = ["open ended", "close ended", "interval"]
+FUND_TYPE_CHOICES = ["open ended schemes", "close ended schemes", "interval fund schemes"]
 FUND_RETURN_OPTIONS = ['growth', 'dividend']
 FUND_INVESTMENT_OPTIONS = ['direct', 'regular']
