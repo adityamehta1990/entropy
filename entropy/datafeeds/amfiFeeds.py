@@ -31,26 +31,29 @@ def fundDataFromAMFI():
     # so need to call it only first time and when we want to update with new funds
     resp = webio.requestWithTries(AMFI_DAILY_NAV_URL)
     data = resp.text.splitlines()
-    # schema = data[0].split(';')
+    # schema = data[0].split(';') # schema is on the first line
     data = [line.strip() for line in data[1:] if len(line.strip()) > 0]
     fundList = []
     pattern = re.compile('|'.join(fc.FUND_TYPE_CHOICES), re.IGNORECASE)
     currFundType = currFundHouse = ""
     for line in data:
-        if pattern.search(line) is not None:
-            currFundType = line
-        elif line.find(';') >= 0:
+        if line.find(';') >= 0:
             parts = line.split(';')
-            fundList.append({
+            info = {
                 fc.FUND_HOUSE : currFundHouse,
                 fc.FUND_TYPE : currFundType,
                 fc.FUND_CODE_AMFI : parts[0],
                 fc.FUND_NAME_AMFI : parts[3],
                 fc.ISIN : parts[1],
                 fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND
-            })
+            }
+            info = fundData.enrichFundInfo(info)
+            fundList.append(info)
         else:
-            currFundHouse = line
+            if pattern.search(line) is not None:
+                currFundType = line
+            else:
+                currFundHouse = line
     return fundList
 
 def updateFundMetaData(client):

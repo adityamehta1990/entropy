@@ -1,10 +1,10 @@
-import pandas as pd
+'''library to get/update/manipulate fund data'''
 import re
-from fuzzywuzzy import fuzz
 from entropy.db import dbclient
 from entropy.asset import assetData
 import entropy.fund.constants as fc
 import entropy.asset.constants as ac
+from entropy.utils import match
 # define schema, possible values, etc
 
 def fundList(client, navDate=None):
@@ -36,19 +36,56 @@ def updateFundInfo(client, Id, fundInfo):
 def updateFundNAVOnDate(client, dt, valueMap):
     return assetData.updateValuesOnDate(client, dt, valueMap, fc.ASSET_TYPE_FUND, fc.FUND_CODE_AMFI)
 
+def fundNameProcessor(fundName):
+    '''for use in fuzzywuzzy or other fund name processing'''
+    fundName = fundName.replace('option', 'plan')
+    fundName = fundName.replace('regular', '').replace('standard', '')
+    return fundName
+
 # only enrich missing data
-def enrichedFundInfo(client, Id):
-    info = assetData.assetInfo(client, Id)
-    enrichedInfo = {}
-    nameParts = [part.strip() for part in info[fc.FUND_NAME_AMFI].split('-')]
+def enrichFundInfo(info):
+    fundName = fundNameProcessor(info[fc.FUND_NAME_AMFI].lower())
+    fundType = info[fc.FUND_TYPE].lower()
+    nameParts = [part.strip() for part in fundName.split('-')]
     # amfi info based enrichment logic
+    # strip out growth/div and direct plan info from fund name
     if not info.get(fc.FUND_NAME):
-        pattern = re.compile('|'.join(fc.FUND_RETURN_OPTIONS + fc.FUND_INVESTMENT_OPTIONS), re.IGNORECASE)
-        enrichedInfo[fc.FUND_NAME] = '-'.join(filter(lambda x: not pattern.search(x), nameParts))
+        if len(nameParts) > 1:
+            pattern = re.compile('|'.join(fc.FUND_RETURN_OPTIONS + fc.FUND_MODES), re.IGNORECASE)
+            info[fc.FUND_NAME] = ' '.join([x for x in nameParts if not pattern.search(x)])
+        else:
+            info[fc.FUND_NAME] = fundName
+            for rem in fc.FUND_RETURN_OPTIONS + fc.FUND_MODES + ['plan']:
+                info[fc.FUND_NAME] = info[fc.FUND_NAME].replace(rem, '')
+    # add meta data
     if not info.get(fc.IS_OPEN_ENDED):
-        enrichedInfo[fc.IS_OPEN_ENDED] = re.compile('open ended scheme', re.IGNORECASE).search(info[fc.FUND_TYPE]) is not None
+        info[fc.IS_OPEN_ENDED] = match.matchAnyIdentifier(fundType, ['open ended schemes'])
     if not info.get(fc.IS_DIRECT):
-        enrichedInfo[fc.IS_DIRECT] = re.compile('direct', re.IGNORECASE).search(info[fc.FUND_NAME_AMFI]) is not None
+        info[fc.IS_DIRECT] = match.matchAnyIdentifier(fundName, ['direct'])
     if not info.get(fc.HAS_DIVIDEND):
-        enrichedInfo[fc.HAS_DIVIDEND] = re.compile('dividend', re.IGNORECASE).search(info[fc.FUND_NAME_AMFI]) is not None
-    return enrichedInfo
+        info[fc.HAS_DIVIDEND] = match.matchAnyIdentifier(fundName, ['dividend'])
+    if info[fc.HAS_DIVIDEND] and not info.get(fc.DIVIDEND_PERIOD):
+        periods = [fc.DIVIDEND_PERIOD_DAILY, fc.DIVIDEND_PERIOD_WEEKLY, fc.DIVIDEND_PERIOD_MONTHLY,\
+                fc.DIVIDEND_PERIOD_SEMIANNUAL, fc.DIVIDEND_PERIOD_ANNUAL]
+        info[fc.DIVIDEND_PERIOD] = match.matchOneIdentifier(fundName, periods)
+    if not info.get(fc.ASSET_CLASS):
+        if match.matchAnyIdentifier(fundType, ['balanced']):
+            info[fc.ASSET_CLASS] = ac.ASSET_CLASS_HYBRID
+        elif match.matchAnyIdentifier(fundType, fc.FUND_TYPES_DEBT) or \
+            match.matchAnyIdentifier(fundName, fc.FUND_IDENTIFIERS_DEBT):
+            info[fc.ASSET_CLASS] = ac.ASSET_CLASS_DEBT
+        elif match.matchAnyIdentifier(fundType, fc.FUND_TYPES_EQUITY) or \
+            match.matchAnyIdentifier(fundName, fc.FUND_IDENTIFIERS_EQUITY):
+            info[fc.ASSET_CLASS] = ac.ASSET_CLASS_EQUITY
+        else:
+            info[fc.ASSET_CLASS] = '' # could not find anything
+    # get the implied asset name from all parts. always recompute and replace
+    parts = [
+        info[fc.FUND_NAME],
+        'dividend' if info[fc.HAS_DIVIDEND] else 'growth',
+        'direct plan' if info[fc.IS_DIRECT] else 'regular plan',
+    ]
+    if len(info[fc.DIVIDEND_PERIOD]) > 0:
+        parts[1] = info[fc.DIVIDEND_PERIOD] + ' ' + parts[1]
+    info[ac.ASSET_NAME] = ' - '.join(parts).title()
+    return info
