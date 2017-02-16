@@ -1,15 +1,17 @@
-import datetime
+'''Portfolio class (inherits from CompositeAsset)'''
+import numpy as np
 import pandas as pd
-import entropy.fund.constants as fc
+import entropy.asset.constants as ac
 import entropy.portfolio.constants as pc
 import entropy.asset.assetData as assetData
 from entropy.asset.compositeAsset import CompositeAsset
 import entropy.utils.timeseries as tsu
-import numpy as np
 from entropy.analytics import analytics
 
 class Portfolio(CompositeAsset):
-
+    '''Portfolio (inherits from CompositeAsset)
+    Implements nav, holdings
+    '''
     def portfolioData(self):
         data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id}, {pc.TRANSACTIONS : 0})
         if data.count() == 1:
@@ -33,13 +35,7 @@ class Portfolio(CompositeAsset):
         return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
 
     def holdings(self):
-        keys = [
-            fc.ISIN,
-            fc.ASSET_TYPE_FUND,
-            fc.ASSET_CLASS,
-            fc.STRATEGY_TYPE
-        ]
-        return assetData.assetInfo(self.client, self.holdingsIds(), keys=keys)
+        return assetData.assetInfo(self.client, self.holdingsIds(), keys=ac.ASSET_ATTRIBUTES)
 
     def holdingsCF(self):
         txns = pd.DataFrame(self.transactions())
