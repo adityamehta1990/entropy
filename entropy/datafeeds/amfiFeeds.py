@@ -56,8 +56,8 @@ def fundDataFromAMFI(forceEnrich=False):
                 currFundHouse = line
     return fundList
 
-def updateFundMetaData(client):
-    fundInfoArray = fundDataFromAMFI()
+def updateFundMetaData(client, forceEnrich=False):
+    fundInfoArray = fundDataFromAMFI(forceEnrich=forceEnrich)
     ack = True
     for fi in fundInfoArray:
         fundData.checkFundAttributes(fi)

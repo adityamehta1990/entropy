@@ -8,7 +8,7 @@ import entropy.utils.dateandtime as dtu
 client = dbclient.MClient()
 
 # update meta data
-amfiFeeds.updateFundMetaData(client)
+amfiFeeds.updateFundMetaData(client, forceEnrich=False)
 # daily
 amfiFeeds.updateDailyFundNAV(client)
 # historical
