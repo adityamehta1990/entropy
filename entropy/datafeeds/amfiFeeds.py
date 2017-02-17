@@ -26,7 +26,7 @@ def fundNAVFromAMFI(dt=datetime.datetime.today() - datetime.timedelta(days=1)):
     return dict(valueMap)
 
 # todo: write fund class and data to make sure parsed data conforms
-def fundDataFromAMFI():
+def fundDataFromAMFI(forceEnrich=False):
     # it looks like this has all funds that were ever sold
     # so need to call it only first time and when we want to update with new funds
     resp = webio.requestWithTries(AMFI_DAILY_NAV_URL)
@@ -47,7 +47,7 @@ def fundDataFromAMFI():
                 fc.ISIN : parts[1],
                 fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND
             }
-            info = fundData.enrichFundInfo(info)
+            info = fundData.enrichFundInfo(info, forceUpdate=forceEnrich)
             fundList.append(info)
         else:
             if pattern.search(line) is not None:

@@ -39,17 +39,17 @@ def updateFundNAVOnDate(client, dt, valueMap):
 def fundNameProcessor(fundName):
     '''for use in fuzzywuzzy or other fund name processing'''
     fundName = fundName.replace('option', 'plan')
-    fundName = fundName.replace('regular', '').replace('standard', '')
+    fundName = fundName.replace('standard', 'regular')
     return fundName
 
 # only enrich missing data
-def enrichFundInfo(info):
+def enrichFundInfo(info, forceUpdate=False):
     fundName = fundNameProcessor(info[fc.FUND_NAME_AMFI].lower())
     fundType = info[fc.FUND_TYPE].lower()
     nameParts = [part.strip() for part in fundName.split('-')]
     # amfi info based enrichment logic
     # strip out growth/div and direct plan info from fund name
-    if not info.get(fc.FUND_NAME):
+    if not info.get(fc.FUND_NAME) or forceUpdate:
         if len(nameParts) > 1:
             pattern = re.compile('|'.join(fc.FUND_RETURN_OPTIONS + fc.FUND_MODES), re.IGNORECASE)
             info[fc.FUND_NAME] = ' '.join([x for x in nameParts if not pattern.search(x)])
@@ -58,17 +58,17 @@ def enrichFundInfo(info):
             for rem in fc.FUND_RETURN_OPTIONS + fc.FUND_MODES + ['plan']:
                 info[fc.FUND_NAME] = info[fc.FUND_NAME].replace(rem, '')
     # add meta data
-    if not info.get(fc.IS_OPEN_ENDED):
+    if not info.get(fc.IS_OPEN_ENDED) or forceUpdate:
         info[fc.IS_OPEN_ENDED] = match.matchAnyIdentifier(fundType, ['open ended schemes'])
-    if not info.get(fc.IS_DIRECT):
+    if not info.get(fc.IS_DIRECT) or forceUpdate:
         info[fc.IS_DIRECT] = match.matchAnyIdentifier(fundName, ['direct'])
-    if not info.get(fc.HAS_DIVIDEND):
+    if not info.get(fc.HAS_DIVIDEND) or forceUpdate:
         info[fc.HAS_DIVIDEND] = match.matchAnyIdentifier(fundName, ['dividend'])
-    if info[fc.HAS_DIVIDEND] and not info.get(fc.DIVIDEND_PERIOD):
+    if info[fc.HAS_DIVIDEND] and not info.get(fc.DIVIDEND_PERIOD) or forceUpdate:
         periods = [fc.DIVIDEND_PERIOD_DAILY, fc.DIVIDEND_PERIOD_WEEKLY, fc.DIVIDEND_PERIOD_MONTHLY,\
                 fc.DIVIDEND_PERIOD_SEMIANNUAL, fc.DIVIDEND_PERIOD_ANNUAL]
         info[fc.DIVIDEND_PERIOD] = match.matchOneIdentifier(fundName, periods)
-    if not info.get(fc.ASSET_CLASS):
+    if not info.get(fc.ASSET_CLASS) or forceUpdate:
         if match.matchAnyIdentifier(fundType, ['balanced']):
             info[fc.ASSET_CLASS] = ac.ASSET_CLASS_HYBRID
         elif match.matchAnyIdentifier(fundType, fc.FUND_TYPES_DEBT) or \
