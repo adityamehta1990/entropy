@@ -49,4 +49,9 @@ METHOD = {
     STD : np.nanstd,
     MIN : np.nanmin,
     MAX : np.nanmax,
+    MSUM : lambda x: np.nanprod(1 + x) - 1,
 }
+
+AGG_ROLLING = "rolling"
+AGG_PERIOD = "period"
+AGG_LAST_PERIOD = "last period"
