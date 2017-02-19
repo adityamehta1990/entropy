@@ -1,8 +1,10 @@
+'''Index data feeds from NSE'''
 import datetime
 import pandas as pd
 from entropy.asset import assetData
 import entropy.utils.dateandtime as dtu
 import entropy.utils.webio as webio
+import entropy.asset.constants as ac
 import entropy.benchmark.constants as bmc
 
 # equity list with ISIN and industry. this is independent of provider
@@ -22,18 +24,21 @@ def benchmarkMetaData(filename):
     for col in df.columns:
         if df[col].dtype == object:
             df[col] = df[col].str.strip()
-    df[bmc.ASSET_TYPE_KEY] = bmc.ASSET_TYPE_BENCHMARK
+    df[ac.ASSET_TYPE_KEY] = bmc.ASSET_TYPE_BENCHMARK
+    df[ac.ASSET_NAME] = df[bmc.BENCHMARK_NAME]
     df = df.fillna('')
     return df.to_dict('records')
 
 def updateBenchmarkMetaData(client, filename='data/benchmarkMetaData.csv'):
     bmInfoArray = benchmarkMetaData(filename)
-    ack = True
+    missing = []
     for bmi in bmInfoArray:
         # checkWrongKeys(bmi, bmc.BENCHMARK_ATTRIBUTES)
         bmName = bmi.get(bmc.BENCHMARK_NAME)
         if bmName:
-            ack = client.updateAssetMetaData({bmc.BENCHMARK_NAME: bmName}, bmi) and ack
+            ack = client.updateAssetMetaData({bmc.BENCHMARK_NAME: bmName}, bmi)
+            if not ack:
+                missing.append(bmName)
     return ack
 
 def bmLevelsFromNSE(dt):
@@ -70,19 +75,27 @@ def updateBMVals(client, dt, valueMap):
 
 def updateDailyBenchmarkPrices(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
-    valueMap = bmLevelsFromNSE(dt)
-    return updateBMVals(client, dt, valueMap)
+    try:
+        valueMap = bmLevelsFromNSE(dt)
+        ack = updateBMVals(client, dt, valueMap)
+    except Exception:
+        print("Skipping for %s"%(dt.date()))
+        ack = False
+    return ack
 
-def updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20060401')):
+def updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20060401'), verbose=False):
     dt = datetime.datetime.today() - datetime.timedelta(days=2)
-    ack = True
+    missing = []
     while dt >= startDate:
         try:
             valueMap = bmLevelsFromNSE(dt)
+            ack = updateBMVals(client, dt, valueMap)
+            if not ack:
+                print('Failed to write db for %s'%(dt.date()))
+            elif verbose:
+                print("Update successful for %s"%(dt.date()))
         except Exception:
+            missing.append(dt)
             print("Skipping for %s"%(dt.date()))
-        ack = updateBMVals(client, dt, valueMap) and ack
-        if ack:
-            print("Update successful for %s"%(dt.date()))
         dt = dtu.prevMarketClose(dt - datetime.timedelta(days=1))
-    return ack
+    return missing

@@ -1,3 +1,4 @@
+'''Stock and bond data feeds from BSE'''
 import datetime
 import pandas as pd
 from entropy.asset import assetData
@@ -44,18 +45,21 @@ def readAssetMetaData(filename, assetClass='equity'):
         raise 'Unknown asset class'
     renameMap = dict(zip(BSE_COLUMN_NAMES, assetColumnNames))
     df = df.rename(columns=renameMap)
+    df[ac.ASSET_NAME] = df[sc.STOCK_NAME]
     df = df.drop('Instrument', 1)
     return df.to_dict('records')
 
 def updateStockMetaData(client, filename='data/ListOfScripsEquity.csv'):
     stockInfoArray = readAssetMetaData(filename, 'equity')
-    ack = True
+    missing = []
     for si in stockInfoArray:
         # stockData.checkStockAttributes(si)
         bseCode = si.get(sc.STOCK_CODE_BSE)
         if bseCode:
-            ack = client.updateAssetMetaData({sc.STOCK_CODE_BSE: bseCode}, si) and ack
-    return ack
+            ack = client.updateAssetMetaData({sc.STOCK_CODE_BSE: bseCode}, si)
+            if not ack:
+                missing.append(bseCode)
+    return missing
 
 def updateBondMetaData(client, filename='data/ListOfScripsBond.csv'):
     bondInfoArray = readAssetMetaData(filename, 'debt')
@@ -98,20 +102,29 @@ def updateStockPrices(client, dt, valueMap):
 
 def updateDailyStockPrices(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
-    prices = stockPricesFromBSE(dt)
-    return updateStockPrices(client, dt, prices)
+    try:
+        prices = stockPricesFromBSE(dt)
+        ack = updateStockPrices(client, dt, prices)
+    except Exception:
+        print("Skipping for %s"%(dt.date()))
+        ack = False
+    return ack
 
-def updateHistStockPrices(client, startDate=dtu.dateParser('20060401')):
+# todo: centralize error handling
+def updateHistStockPrices(client, startDate=dtu.dateParser('20060401'), verbose=False):
     dt = datetime.datetime.today() - datetime.timedelta(days=2)
-    ack = True
+    missing = []
     while dt >= startDate:
         # try catch due to holidays - remove after implementing holiday calendar
         try:
             prices = stockPricesFromBSE(dt)
-            ack = updateStockPrices(client, dt, prices) and ack
-            if ack:
+            ack = updateStockPrices(client, dt, prices)
+            if not ack:
+                print('Failed to write db for %s'%(dt.date()))
+            elif verbose:
                 print("Update successful for %s"%(dt.date()))
         except Exception:
+            missing.append(dt)
             print("Skipping for %s"%(dt.date()))
         dt = dtu.prevMarketClose(dt - datetime.timedelta(days=1))
-    return ack
+    return missing
