@@ -55,3 +55,4 @@ METHOD = {
 AGG_ROLLING = "rolling"
 AGG_PERIOD = "period"
 AGG_LAST_PERIOD = "last period"
+AGG_LAST = "last"

@@ -74,3 +74,20 @@ class Portfolio(CompositeAsset):
         # is there a better way?
         nav[hAUM.sum(axis=1).isnull()] = np.nan
         return nav.to_frame(name=self.Id)
+
+# todo
+# tables of stats
+# excess returns
+# portfolio Vol (rolling if possible)
+# mean var opt (with select funds) - take risk profile as inputs
+
+# Charts
+# CF (monthly agg) bar chart
+# One chart per benchmark (cum pnls along with their benchmark cum pml)
+# Asset Class Agg cum pnl 
+# Portfolio cum pnl + hypothetical portfolio benchmark
+# Pie of allocation
+# 
+
+
+

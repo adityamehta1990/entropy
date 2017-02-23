@@ -6,8 +6,8 @@ import entropy.analytics.constants as ac
 # todo: make unexposed functions private
 # todo: ac -> ayc
 
-# 3.5Y -> (3.5,'Y')
 def windowInDays(window):
+    # todo: when window is period ('M'/'A')
     m = re.match(r'(\d+(\.\d+)?)([A-Z])', window)
     assert m, 'Invalid window'
     periods, freq = m.group(1, 3)
@@ -51,6 +51,8 @@ def transform(df, method, window):
         t = df.groupby(pd.TimeGrouper(window))
     elif method == ac.AGG_LAST_PERIOD:
         t = df.last(window)
+    elif method == ac.AGG_LAST:
+        ??
     else:
         raise "Unimplemented method"
     return t

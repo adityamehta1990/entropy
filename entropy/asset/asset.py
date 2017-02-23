@@ -6,7 +6,8 @@ from entropy import analytics
 from entropy.asset import assetData
 import entropy.asset.constants as ac
 import entropy.utils.timeseries as tsu
-from entropy.analytics import analytics
+import entropy.analytics.analytics as ay
+import entropy.analytics.constants as ayc
 
 # base class for any type of asset/investment - fund, stock, bond
 # this can implement returns and risk based analytics
@@ -48,30 +49,22 @@ class Asset():
         pass
 
     def dailyReturn(self):
-        return analytics.dailyReturn(self.nav())
+        return ay.dailyReturn(self.nav())
 
     # optional: can add total returns for dividends (cashflow)
 
     # YTD, MTD, 1y, 3y, SI etc
     def returnStats(self):
-        returns = self.returns()
-        return {
-            'MTD': analytics.cumReturn( returns.last('M') ),
-            'QTD': analytics.cumReturn( returns.last('Q') ),
-            'YTD': analytics.cumReturn( returns.last('A') ),
+        returns = self.dailyReturn()
+        stats = [
+            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'M').rename('MTD'),
+            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Q').rename('QTD'),
+            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Y').rename('YTD'),
             'SI': analytics.cumReturn(returns),
             '1Y': analytics.periodReturn(returns,'1Y'),
             '3Y': analytics.periodReturn(returns,'3Y'),
             '5Y': analytics.periodReturn(returns,'5Y')
-        }
+        ]
 
-    # monthly/yearly returns
-    def calendarPeriodReturns(self,type='month'):
-        ret = self.returns()
-        return analytics.calendarPeriodReturns(ret,type)
-
-    # todo: internal rate of return
-
-    # rolling return curve
-    def rollingReturn(self,window='1D'):
-        return analytics.rollingReturn(self.nav(),window).dropna()
+    def rollingReturn(self, window='1D'):
+        return ay.aggReturn(self.dailyReturn(), ayc.AGG_ROLLING, window, annualize=True)
