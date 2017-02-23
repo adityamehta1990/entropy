@@ -1,4 +1,6 @@
-'''run this script to fill data'''
+'''Run this script to fill/update asset data
+DO NOT import this script!
+'''
 from entropy.datafeeds import bseFeeds
 from entropy.datafeeds import nseFeeds
 from entropy.datafeeds import amfiFeeds
@@ -6,19 +8,20 @@ from entropy.db import dbclient
 import entropy.utils.dateandtime as dtu
 
 client = dbclient.MClient()
+verbose = True
+startDate = dtu.dateParser('20140401')
 
 # update meta data
-amfiFeeds.updateFundMetaData(client, forceEnrich=False)
+failedFunds = amfiFeeds.updateFundMetaData(client, forceEnrich=False)
 # daily
 amfiFeeds.updateDailyFundNAV(client)
 # historical
-# fundDataFeed.updateHistFundNAV(client) # for full history
-amfiFeeds.updateHistFundNAV(client, startDate=dtu.dateParser('20140401'))
+failedFundDates = amfiFeeds.updateHistFundNAV(client, startDate=startDate, verbose=verbose)
 
-bseFeeds.updateStockMetaData(client, filename='data/ListOfScripsEquity.csv')
+failedStocks = bseFeeds.updateStockMetaData(client, filename='data/ListOfScripsEquity.csv')
 bseFeeds.updateDailyStockPrices(client)
-bseFeeds.updateHistStockPrices(client, startDate=dtu.dateParser('20140401'))
+failedStockDates = bseFeeds.updateHistStockPrices(client, startDate=startDate, verbose=verbose)
 
-nseFeeds.updateBenchmarkMetaData(client)
+failedBMs = nseFeeds.updateBenchmarkMetaData(client)
 nseFeeds.updateDailyBenchmarkPrices(client)
-nseFeeds.updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20140401'))
+failedBMDates = nseFeeds.updateHistBenchmarkPrices(client, startDate=startDate, verbose=verbose)

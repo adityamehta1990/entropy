@@ -12,7 +12,7 @@ FUND_TYPE = 'fundType'
 ISIN = 'ISIN'
 ASSET_TYPE_KEY = ac.ASSET_TYPE_KEY # hardcoded because it is always a fund
 # calculated by string parsing or input
-FUND_NAME = 'fundName' # nicer looking fund name
+FUND_NAME = 'fundName'
 ASSET_CLASS = 'assetClass'
 STRATEGY_TYPE = 'strategyType' # this is a short hand for investment attributes
 IS_OPEN_ENDED = 'isOpenEnded'
@@ -28,12 +28,20 @@ FUND_ATTRIBUTES = ac.ASSET_ATTRIBUTES + \
 ASSET_TYPE_FUND = 'fund'
 
 FUND_TYPE_CHOICES = ['open ended schemes', 'close ended schemes', 'interval fund schemes']
+FUND_TYPES_HYBRID = ['balanced', 'fund of funds']
 FUND_TYPES_DEBT = ['income', 'liquid', 'gilt', 'money market', 'floating rate']
 FUND_TYPES_EQUITY = ['elss', 'other etfs']
 
 # FUND_IDENTIFIERS_<x> refer to parts of fund name that can help identify <x>
+FUND_IDENTIFIERS_HYBRID = ['arbitrage']
 FUND_IDENTIFIERS_DEBT = ['monthly income', 'short term', 'medium term', 'credit', 'gilt', 'corporate']
-FUND_IDENTIFIERS_EQUITY = ['equity', 'large cap', 'midcap', 'small cap', 'bluechip', 'top 100', 'top 200']
+FUND_IDENTIFIERS_EQUITY = ['equity', 'equities', 'large cap', 'midcap', 'small cap', 'mid cap',\
+        'bluechip', 'blue chip', 'top 100', 'top 200', 'index fund']
+
+# todo: incorporate below to assign further classification
+LARGE_CAP_IDENTIFIERS = ['large cap', 'bluechip', 'blue chip', 'top 100', 'top 200']
+MID_CAP_IDENTIFIERS = ['midcap', 'mid cap']
+SMALL_CAP_IDENTIFIERS = ['small cap']
 
 FUND_RETURN_OPTIONS = ['growth', 'dividend']
 FUND_MODES = ['direct', 'regular']
@@ -43,21 +51,5 @@ DIVIDEND_PERIOD_WEEKLY = 'weekly'
 DIVIDEND_PERIOD_MONTHLY = 'monthly'
 DIVIDEND_PERIOD_SEMIANNUAL = 'half yearly'
 DIVIDEND_PERIOD_ANNUAL = 'yearly'
-
-FUND_CLASSIFICATION = {
-    ASSET_CLASS : ['equity', 'debt', 'hybrid'],
-    STRATEGY_TYPE : []
-}
-
-# these are the various investment attributes based on asset class
-FUND_ATTRIBUTES_EQUITY = {
-    'marketCap' : ['large', 'medium', 'small'],
-    'investmentStyle' : ['value', 'growth', 'blend'],
-    'sector' : ['multi'] # multi if no sector
-}
-
-FUND_ATTRIBUTES_DEBT = {
-    'duration' : ['short', 'medium', 'long'],
-    'creditQuality' :  ['high', 'medium', 'low'],
-    'underlier' : ['gilt', 'corp', 'liquid']
-}
+DIVIDEND_PERIODS = [DIVIDEND_PERIOD_DAILY, DIVIDEND_PERIOD_WEEKLY, DIVIDEND_PERIOD_MONTHLY,\
+                DIVIDEND_PERIOD_SEMIANNUAL, DIVIDEND_PERIOD_ANNUAL]

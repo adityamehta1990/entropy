@@ -58,32 +58,42 @@ def fundDataFromAMFI(forceEnrich=False):
 
 def updateFundMetaData(client, forceEnrich=False):
     fundInfoArray = fundDataFromAMFI(forceEnrich=forceEnrich)
-    ack = True
+    missing = []
     for fi in fundInfoArray:
         fundData.checkFundAttributes(fi)
         amfiCode = fi.get(fc.FUND_CODE_AMFI)
         if amfiCode:
-            ack = client.updateAssetMetaData({fc.FUND_CODE_AMFI: amfiCode}, fi) and ack
-    return ack
+            ack = client.updateAssetMetaData({fc.FUND_CODE_AMFI: amfiCode}, fi)
+            if not ack:
+                missing.append(amfiCode)
+    return missing
 
 # this should be called separately from the server (without concurrent dbclients preferably)
 def updateDailyFundNAV(client):
     dt = datetime.datetime.today() - datetime.timedelta(days=1)
     valueMap = fundNAVFromAMFI(dt)
     ack = fundData.updateFundNAVOnDate(client, dt, valueMap)
+    if not ack:
+        print('Failed to write db for %s'%(dt.date()))
     return ack
 
 # this is a one time thing
 # amfi has data from 1st Apr 2006
-def updateHistFundNAV(client, startDate=dtu.dateParser('20060401')):
+def updateHistFundNAV(client, startDate=dtu.dateParser('20060401'), verbose=False):
     # todo: check min updated date and use that
     # this will just refill everything
     dt = datetime.datetime.today() - datetime.timedelta(days=2)
-    ack = True
+    missing = []
     while dt >= startDate:
-        valueMap = fundNAVFromAMFI(dt)
-        ack = fundData.updateFundNAVOnDate(client, dt, valueMap) and ack
-        if ack:
-            print("Update successful for %s"%(dt.date()))
+        try:
+            valueMap = fundNAVFromAMFI(dt)
+            ack = fundData.updateFundNAVOnDate(client, dt, valueMap)
+            if not ack:
+                print('Failed to write db for %s'%(dt.date()))
+            elif verbose:
+                print("Update successful for %s"%(dt.date()))
+        except Exception:
+            missing.append(dt)
+            print("Skipping for %s"%(dt.date()))
         dt = dt - datetime.timedelta(days=1)
-    return ack
+    return missing
