@@ -52,7 +52,8 @@ def transform(df, method, window):
     elif method == ac.AGG_LAST_PERIOD:
         t = df.last(window)
     elif method == ac.AGG_LAST:
-        ??
+        # todo
+        pass
     else:
         raise "Unimplemented method"
     return t

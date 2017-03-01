@@ -21,25 +21,27 @@ Id = po.clientPortfolios(client, clientName)[0][pc.PORTFOLIO_ID]
 
 Txns = [
     [ "date",       "hour", "schemeCode",   "cashFlow"  ],
-    [ "20150105",   5,      "125494",       1e4         ],
-    [ "20150301",   7,      "100356",       2e4         ],
-    [ "20150601",   13,     "118991",       3e3         ],
-    [ "20150701",   7,      "101042",       4e3         ],
-    [ "20150701",   11,     "100356",       6e4         ],
-    [ "20150901",   14,     "113566",       4e4         ],
-    [ "20150901",   15,     "113566",       1e4         ],
-    [ "20160105",   5,      "118991",       9e4         ],
-    [ "20160105",   8,      "125494",       -3e3        ],
-    [ "20160105",   10,     "118991",       7e3         ],
+    [ "20160405",   5,      "125494",       1e4         ],
+    [ "20160601",   7,      "100356",       2e4         ],
+    [ "20160601",   13,     "118991",       3e3         ],
+    [ "20160701",   7,      "101042",       4e3         ],
+    [ "20160701",   11,     "100356",       6e4         ],
+    [ "20160901",   14,     "113566",       4e4         ],
+    [ "20160901",   15,     "113566",       1e4         ],
+    #[ "20160105",   5,      "118991",       9e4         ],
+    #[ "20160105",   8,      "125494",       -3e3        ],
+    #[ "20160105",   10,     "118991",       7e3         ],
 ]
 
 Txns = pd.DataFrame(Txns[1:],columns=Txns[0])
 
 for txn in Txns.itertuples():
     fund = Fund(fundData.fundIdFromAmfiCode(client,txn.schemeCode),client)
+    txnDate = dtu.parse(txn.date)
+    nav = fund.nav().loc[dtu.nextMarketClose(txnDate)][fund.Id]
     po.addTransaction( \
         client, Id, fund.Id, fund.fundInfo()[fc.FUND_NAME_AMFI], \
-        txn.cashFlow, 0, dtu.parse(txn.date) + datetime.timedelta(hours=txn.hour) \
+        txn.cashFlow, txn.cashFlow / nav, txnDate + datetime.timedelta(hours=int(txn.hour)) \
      )
 
 # P = Portfolio(Id = Id,client=client)

@@ -22,7 +22,7 @@ def addPortfolio():
     clientName = request[portfolioData.CLIENT_NAME].strip()
     portfolioName = request[portfolioData.PORTFOLIO_NAME].strip()
     ack = portfolioData.addPortfolio(client, clientName, portfolioName)
-    return io.json(ack)
+    return webio.json(ack)
 
 @portfolio_api.route('/<portfolioId>/transactions')
 def getPortfolioTransactions(portfolioId):

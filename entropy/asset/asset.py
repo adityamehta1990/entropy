@@ -56,15 +56,15 @@ class Asset():
     # YTD, MTD, 1y, 3y, SI etc
     def returnStats(self):
         returns = self.dailyReturn()
-        stats = [
-            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'M').rename('MTD'),
-            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Q').rename('QTD'),
-            ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Y').rename('YTD'),
-            'SI': analytics.cumReturn(returns),
-            '1Y': analytics.periodReturn(returns,'1Y'),
-            '3Y': analytics.periodReturn(returns,'3Y'),
-            '5Y': analytics.periodReturn(returns,'5Y')
-        ]
+        # stats = [
+        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'M').rename('MTD'),
+        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Q').rename('QTD'),
+        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Y').rename('YTD'),
+        #     'SI': analytics.cumReturn(returns),
+        #     '1Y': analytics.periodReturn(returns,'1Y'),
+        #     '3Y': analytics.periodReturn(returns,'3Y'),
+        #     '5Y': analytics.periodReturn(returns,'5Y')
+        # ]
 
     def rollingReturn(self, window='1D'):
         return ay.aggReturn(self.dailyReturn(), ayc.AGG_ROLLING, window, annualize=True)
