@@ -61,9 +61,12 @@ def fundClassification(fundName, fundType):
     return info
 
 # only enrich missing data
-def enrichFundInfo(info, forceUpdate=False):
-    fundName = fundNameProcessor(info[fc.FUND_NAME_AMFI].lower())
-    fundType = info[fc.FUND_TYPE].lower()
+def enrichFundInfo(info, forceEnrich=False):
+    '''parse fund name, type etc to get various meta data
+    set forceEnrich to True to replace existing meta data passed in info
+    '''
+    fundName = fundNameProcessor(info.get(fc.FUND_NAME_AMFI, '').lower())
+    fundType = info.get(fc.FUND_TYPE, '').lower()
     # classify asset class, strategy, etc
     newInfo = fundClassification(fundName, fundType)
     # amfi info based meta data
@@ -80,15 +83,16 @@ def enrichFundInfo(info, forceUpdate=False):
     newInfo[fc.IS_OPEN_ENDED] = match.matchAnyIdentifier(fundType, ['open ended schemes'])
     newInfo[fc.IS_DIRECT] = match.matchAnyIdentifier(fundName, ['direct'])
     newInfo[fc.HAS_DIVIDEND] = match.matchAnyIdentifier(fundName, ['dividend'])
+    if newInfo[fc.HAS_DIVIDEND]:
     newInfo[fc.DIVIDEND_PERIOD] = match.matchOneIdentifier(fundName, fc.DIVIDEND_PERIODS)
-    if forceUpdate:
+    if forceEnrich:
         info.update(newInfo)
     else:
         newInfo.update(info) # copy back old values from info and reassign
         info = newInfo
     # get the implied asset name from all parts. always recompute and replace
     parts = [info[fc.FUND_NAME]]
-    if info[fc.HAS_DIVIDEND]:
+    if info.get(fc.DIVIDEND_PERIOD):
         parts.append(info[fc.DIVIDEND_PERIOD] + ' dividend')
     else:
         parts.append('growth')

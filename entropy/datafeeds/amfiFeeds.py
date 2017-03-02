@@ -47,7 +47,7 @@ def fundDataFromAMFI(forceEnrich=False):
                 fc.ISIN : parts[1],
                 fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND
             }
-            info = fundData.enrichFundInfo(info, forceUpdate=forceEnrich)
+            info = fundData.enrichFundInfo(info, forceEnrich=forceEnrich)
             fundList.append(info)
         else:
             if pattern.search(line) is not None:
