@@ -8,10 +8,12 @@ import entropy.utils.timeseries as tsu
 def clientPortfolios(client, clientName):
     portCols = dict([(key, 1) for key in [pc.PORTFOLIO_ID, pc.PORTFOLIO_NAME, pc.DATE_CREATED]])
     data = client.portfolioData({pc.CLIENT_NAME : clientName}, portCols)
-    return [scheme for scheme in data]
+    if data.count() > 1:
+        raise Exception('Found more than one portfolio for client {}'.format(clientName))
+    return data[0]
 
 # create/return unique portfolio ID based on portfolio and client name
-def portfolioId(clientName, portfolioName):
+def getPortfolioId(clientName, portfolioName):
     s = clientName + portfolioName
     Id = hashlib.md5(s.encode('utf-8'))
     return Id.hexdigest()
@@ -27,10 +29,10 @@ def newPortfolio(Id, clientName, portfolioName):
     })
 
 def addPortfolio(client, clientName, portfolioName):
-    Id = portfolioId(clientName, portfolioName)
+    Id = getPortfolioId(clientName, portfolioName)
     data = client.portfolioData({pc.PORTFOLIO_ID : Id})
     if data.count() > 0:
-        return False
+        raise 'Portfolio {} for {} already exists'.format(portfolioName, clientName)
     return client.addPortfolio(newPortfolio(Id, clientName, portfolioName))
 
 def newTransactionId(transactions):
@@ -39,21 +41,29 @@ def newTransactionId(transactions):
     else:
         return 0
 
-def newTransaction(Id, assetId, schemeName, cashflow, quantity, date):
+def newTransaction(Id, assetId, assetName, cashflow, quantity, date, txnType):
     return({
         pc.TRANSACTION_ID : Id,
         pc.ASSET_CODE : assetId,
-        pc.ASSET_NAME : schemeName,
+        pc.ASSET_NAME : assetName,
         pc.TXN_CASHFLOW : cashflow,
         pc.TXN_QUANTITY : quantity,
-        pc.TXN_DATE : date
+        pc.TXN_DATE : date,
+        pc.TXN_TYPE : txnType
     })
 
-def addTransaction(client, portfolioId, assetId, schemeName, cashflow, quantity, date):
+def addTransaction(client, portfolioId, assetId, schemeName, cashflow, quantity, date, txnType):
     Ts = Portfolio(portfolioId, client).transactions()
     transactionId = newTransactionId(Ts)
-    Ts.append(newTransaction(transactionId, assetId, schemeName, cashflow, quantity, date))
+    Ts.append(newTransaction(transactionId, assetId, schemeName, cashflow, quantity, date, txnType))
     return client.updatePortfolio({pc.PORTFOLIO_ID : portfolioId}, {pc.TRANSACTIONS : Ts})
+
+def addManyTransactions(client, portfolioId, txns):
+    Ts = Portfolio(portfolioId, client).transactions()
+    for txn in txns:
+        txn[pc.TRANSACTION_ID] = newTransactionId(Ts)
+        Ts.append(txn)
+    return client.updatePortfolio({pc.PORTFOLIO_ID: portfolioId}, {pc.TRANSACTIONS : Ts})
 
 def removeTransaction(client, portfolioId, transactionId):
     Ts = [txn for txn in Portfolio(portfolioId, client).transactions() \
