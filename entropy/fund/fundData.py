@@ -16,11 +16,15 @@ def fundList(client, navDate=None):
 def fundIdFromAmfiCode(client, amfiCode):
     data = client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND, \
                                  fc.FUND_CODE_AMFI : amfiCode}, {fc.FUND_CODE_AMFI : 1})
-    assert data.count() == 1, "Invalid amfi code"
+    if data.count() != 1:
+        raise "Invalid amfi code {}".format(amfiCode)
     return str(data[0][dbclient.MONGO_ID])
 
 def fundIdFromFundName(client, fundName):
-    pass
+    info = enrichFundInfo({fc.FUND_NAME_AMFI: fundName})
+    funds = fundList(client)
+    fund = match.matchDictBest(info, funds, key=ac.ASSET_NAME)
+    return fund.get(dbclient.MONGO_ID)
 
 # check what got passed in from fundInfo
 def checkFundAttributes(fundInfo):
@@ -40,12 +44,20 @@ def updateFundNAVOnDate(client, dt, valueMap):
     return assetData.updateValuesOnDate(client, dt, valueMap, fc.ASSET_TYPE_FUND, fc.FUND_CODE_AMFI)
 
 def fundNameProcessor(fundName):
-    '''for use in fuzzywuzzy or other fund name processing'''
-    fundName = fundName.replace('option', 'plan')
-    fundName = fundName.replace('standard', 'regular')
-    return fundName
+    '''for use in fuzzywuzzy or other fund name processing
+    removes separators and unimportant parts of name such as option or plan
+    '''
+    pattern = re.compile('option|plan', re.IGNORECASE)
+    fundName = pattern.sub('', fundName)
+    fundName = re.sub('standard', 'Regular', fundName, flags=re.IGNORECASE)
+    if not match.matchAnyIdentifier(fundName, [fc.DIVIDEND_PERIOD_SEMIANNUAL]):
+        fundName = re.sub('yearly', fc.DIVIDEND_PERIOD_ANNUAL, fundName, re.IGNORECASE)
+    fundName = ' '.join(fundName.replace('-', ' ').split())
+    return fundName.strip()
 
 def fundClassification(fundName, fundType):
+    '''classify asset class and strategy'''
+    # todo: classify strategy/substrategy
     info = {}
     if match.matchAnyIdentifier(fundType, fc.FUND_TYPES_HYBRID) or \
         match.matchAnyIdentifier(fundName, fc.FUND_IDENTIFIERS_HYBRID):
@@ -65,26 +77,21 @@ def enrichFundInfo(info, forceEnrich=False):
     '''parse fund name, type etc to get various meta data
     set forceEnrich to True to replace existing meta data passed in info
     '''
-    fundName = fundNameProcessor(info.get(fc.FUND_NAME_AMFI, '').lower())
+    fundName = fundNameProcessor(info.get(fc.FUND_NAME_AMFI, ''))
     fundType = info.get(fc.FUND_TYPE, '').lower()
     # classify asset class, strategy, etc
     newInfo = fundClassification(fundName, fundType)
-    # amfi info based meta data
-    nameParts = [part.strip() for part in fundName.split('-')]
-    # strip out growth/div and direct plan info from fund name
-    if len(nameParts) > 1:
-        pattern = re.compile('|'.join(fc.FUND_RETURN_OPTIONS + fc.FUND_MODES), re.IGNORECASE)
-        newInfo[fc.FUND_NAME] = ' '.join([x for x in nameParts if not pattern.search(x)])
-    else:
-        newInfo[fc.FUND_NAME] = fundName
-        for rem in fc.FUND_RETURN_OPTIONS + fc.FUND_MODES + ['plan']:
-            newInfo[fc.FUND_NAME] = newInfo[fc.FUND_NAME].replace(rem, '').strip()
+    # fund base name - strip out growth/div and direct plan info
+    pattern = re.compile('|'.join(fc.FUND_RETURN_OPTIONS + fc.FUND_MODES + \
+                    fc.DIVIDEND_PERIODS + ['plan', 'div']), re.IGNORECASE)
+    newInfo[fc.FUND_NAME] = pattern.sub('', fundName).strip()
     # add meta data
+    fundName = fundName.lower() # dont lower for FUND_NAME
     newInfo[fc.IS_OPEN_ENDED] = match.matchAnyIdentifier(fundType, ['open ended schemes'])
     newInfo[fc.IS_DIRECT] = match.matchAnyIdentifier(fundName, ['direct'])
-    newInfo[fc.HAS_DIVIDEND] = match.matchAnyIdentifier(fundName, ['dividend'])
+    newInfo[fc.HAS_DIVIDEND] = match.matchAnyIdentifier(fundName, ['dividend', 'div'])
     if newInfo[fc.HAS_DIVIDEND]:
-    newInfo[fc.DIVIDEND_PERIOD] = match.matchOneIdentifier(fundName, fc.DIVIDEND_PERIODS)
+        newInfo[fc.DIVIDEND_PERIOD] = match.matchOneIdentifier(fundName, fc.DIVIDEND_PERIODS)
     if forceEnrich:
         info.update(newInfo)
     else:
@@ -92,10 +99,10 @@ def enrichFundInfo(info, forceEnrich=False):
         info = newInfo
     # get the implied asset name from all parts. always recompute and replace
     parts = [info[fc.FUND_NAME]]
-    if info.get(fc.DIVIDEND_PERIOD):
-        parts.append(info[fc.DIVIDEND_PERIOD] + ' dividend')
+    if info[fc.HAS_DIVIDEND]:
+        parts.append(((info[fc.DIVIDEND_PERIOD] or '').title() + ' Dividend').strip())
     else:
-        parts.append('growth')
-    parts.append('direct plan' if info[fc.IS_DIRECT] else 'regular plan')
-    info[ac.ASSET_NAME] = ' - '.join(parts).title()
+        parts.append('Growth')
+    parts.append('Direct' if info[fc.IS_DIRECT] else 'Regular')
+    info[ac.ASSET_NAME] = ' - '.join(parts)
     return info
