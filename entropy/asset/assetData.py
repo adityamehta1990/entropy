@@ -22,7 +22,7 @@ def assetInfo(client, Ids, keys=ac.ASSET_ATTRIBUTES):
     projection = dict([(key, 1) for key in keys])
     data = [d for d in client.assetMetaData({dbclient.MONGO_ID: {"$in": Ids}}, projection)]
     if len(data) != len(Ids):
-        raise "Could not find meta data for provided Ids"
+        raise RuntimeError("Could not find meta data for provided Ids")
     return data
 
 # can be called by any asset after performing custom checks on updatedInfo
@@ -34,7 +34,7 @@ def valuesOnDate(client, dt):
     if val.count() == 0:
         return {}
     elif val.count() > 1:
-        raise "Found duplicate valuations for date: {}".format(dt.isoformat())
+        raise RuntimeError("Found duplicate valuations for date: {}".format(dt.isoformat()))
     return val[0]
 
 def valuesByIds(client, Ids):

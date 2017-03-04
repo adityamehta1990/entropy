@@ -17,7 +17,7 @@ def fundIdFromAmfiCode(client, amfiCode):
     data = client.assetMetaData({fc.ASSET_TYPE_KEY : fc.ASSET_TYPE_FUND, \
                                  fc.FUND_CODE_AMFI : amfiCode}, {fc.FUND_CODE_AMFI : 1})
     if data.count() != 1:
-        raise "Invalid amfi code {}".format(amfiCode)
+        raise RuntimeError("Invalid amfi code {}".format(amfiCode))
     return str(data[0][dbclient.MONGO_ID])
 
 def fundIdFromFundName(client, fundName):
@@ -30,7 +30,7 @@ def fundIdFromFundName(client, fundName):
 def checkFundAttributes(fundInfo):
     wrongKeys = [key for key in fundInfo.keys() if key not in fc.FUND_ATTRIBUTES]
     if len(wrongKeys):
-        raise Exception('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
+        raise RuntimeError('{} are not a valid calculated fund attribute(s)'.format(','.join(wrongKeys)))
     return True
 
 # fundInfo can be passed back from website or can be "enriched"

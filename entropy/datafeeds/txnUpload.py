@@ -26,7 +26,7 @@ def importFundTransactionsFromFile(client, portfolioId, fileName):
     elif fileName.endswith('csv'):
         df = pd.read_csv(fileName)
     else:
-        raise Exception('Unknown file type')
+        raise RuntimeError('Unknown file type')
     for col in df.columns:
         if df[col].dtype == object:
             df[col] = df[col].str.strip()

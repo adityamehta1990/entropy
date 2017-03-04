@@ -14,9 +14,13 @@ DATES_KEY = "dates"
 
 # all http responses will be of the form {data : <>}
 JSON_KEY = "data"
+JSON_ERROR_KEY = "error`"
 
 def json(data):
     return jsonify({JSON_KEY : data})
+
+def err(e):
+    return jsonify({JSON_ERROR_KEY: str(e)})
 
 def ts2dict(df):
     # Alternative:

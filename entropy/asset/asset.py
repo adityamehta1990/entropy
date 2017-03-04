@@ -28,7 +28,7 @@ class Asset():
 
     def assetInfo(self, keys=[]):
         if not self.isSavedAsset():
-            raise "Must NOT invoke asset info on " + type(self)
+            raise NotImplementedError("Must NOT invoke asset info on " + type(self))
         return assetData.assetInfo(self.client, [self.Id], keys)[0]
 
     # retrives NAV stored in database

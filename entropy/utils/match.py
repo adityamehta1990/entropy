@@ -24,5 +24,5 @@ def matchDictBest(query, choices, key=None, scorer=fuzz.token_set_ratio):
     if len(matches) == 1:
         return matches[0]
     elif len(matches) > 1:
-        raise 'Could not find a unique match'
+        raise RuntimeError('Could not find a unique match for {}'.format(str(query)))
     return {}

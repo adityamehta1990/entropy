@@ -9,7 +9,8 @@ import entropy.analytics.constants as ac
 def windowInDays(window):
     # todo: when window is period ('M'/'A')
     m = re.match(r'(\d+(\.\d+)?)([A-Z])', window)
-    assert m, 'Invalid window'
+    if not m:
+        raise RuntimeError('Invalid window {}'.format(window))
     periods, freq = m.group(1, 3)
     return int(ac.DAYS_IN_PERIOD[freq] * float(periods))
 
@@ -55,7 +56,7 @@ def transform(df, method, window):
         # todo
         pass
     else:
-        raise "Unimplemented method"
+        raise NotImplementedError("Unimplemented method {}".format(method))
     return t
 
 def applyFunc(tfm, func, method):
@@ -66,7 +67,7 @@ def applyFunc(tfm, func, method):
     elif method == ac.AGG_LAST_PERIOD:
         df = tfm.apply(func, raw=True)
     else:
-        raise "Unimplemented method"
+        raise NotImplementedError("Unimplemented method {}".format(method))
     return df
 
 def aggReturn(df, method, window, annualize=False):

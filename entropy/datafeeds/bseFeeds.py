@@ -42,7 +42,7 @@ def readAssetMetaData(filename, assetClass='equity'):
         df[ac.ASSET_TYPE_KEY] = bc.ASSET_TYPE_BOND
         assetColumnNames = BOND_KEYS
     else:
-        raise 'Unknown asset class'
+        raise RuntimeError('Unknown asset class')
     renameMap = dict(zip(BSE_COLUMN_NAMES, assetColumnNames))
     df = df.rename(columns=renameMap)
     df[ac.ASSET_NAME] = df[sc.STOCK_NAME]

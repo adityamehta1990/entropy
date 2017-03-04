@@ -9,7 +9,7 @@ def clientPortfolios(client, clientName):
     portCols = dict([(key, 1) for key in [pc.PORTFOLIO_ID, pc.PORTFOLIO_NAME, pc.DATE_CREATED]])
     data = client.portfolioData({pc.CLIENT_NAME : clientName}, portCols)
     if data.count() > 1:
-        raise Exception('Found more than one portfolio for client {}'.format(clientName))
+        raise RuntimeError('Found more than one portfolio for client {}'.format(clientName))
     return data[0]
 
 # create/return unique portfolio ID based on portfolio and client name
@@ -32,7 +32,7 @@ def addPortfolio(client, clientName, portfolioName):
     Id = getPortfolioId(clientName, portfolioName)
     data = client.portfolioData({pc.PORTFOLIO_ID : Id})
     if data.count() > 0:
-        raise 'Portfolio {} for {} already exists'.format(portfolioName, clientName)
+        raise RuntimeError('Portfolio {} for {} already exists'.format(portfolioName, clientName))
     return client.addPortfolio(newPortfolio(Id, clientName, portfolioName))
 
 def newTransactionId(transactions):
