@@ -45,11 +45,14 @@ def updateFundNAVOnDate(client, dt, valueMap):
 
 def fundNameProcessor(fundName):
     '''for use in fuzzywuzzy or other fund name processing
-    removes separators and unimportant parts of name such as option or plan
+    1. Removes - and normalizes white space
+    2. Standardize parts of name (standard -> regular, mid cap -> midcap)
+    3. Removes unimportant parts of name (option, plan)
     '''
     pattern = re.compile('option|plan', re.IGNORECASE)
     fundName = pattern.sub('', fundName)
     fundName = re.sub('standard', 'Regular', fundName, flags=re.IGNORECASE)
+    fundName = re.sub('mid cap', 'Midcap', fundName, flags=re.IGNORECASE)
     if not match.matchAnyIdentifier(fundName, [fc.DIVIDEND_PERIOD_SEMIANNUAL]):
         fundName = re.sub('yearly', fc.DIVIDEND_PERIOD_ANNUAL, fundName, re.IGNORECASE)
     fundName = ' '.join(fundName.replace('-', ' ').split())
