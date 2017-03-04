@@ -31,6 +31,13 @@ class Portfolio(CompositeAsset):
             ts = []
         return ts
 
+    # there can be multiple transactions in same fund on same date
+    # this leads to duplicate entries while creating index from txn date
+    # in any case, we should sum up txns made on the same day
+    def _aggTxns(self):
+        txns = pd.DataFrame(self.transactions())
+        return txns.groupby([pc.TXN_DATE, pc.ASSET_CODE, pc.ASSET_NAME], as_index=False).sum()
+
     def holdingsIds(self):
         return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
 
@@ -38,13 +45,13 @@ class Portfolio(CompositeAsset):
         return assetData.assetInfo(self.client, self.holdingsIds(), keys=ac.ASSET_ATTRIBUTES)
 
     def holdingsCF(self):
-        txns = pd.DataFrame(self.transactions())
+        txns = self._aggTxns()
         cf = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_CASHFLOW, index=pc.TXN_DATE)
         cf.index.rename(None, inplace=True)
         return tsu.dailySum(cf)
 
     def holdingsQty(self):
-        txns = pd.DataFrame(self.transactions())
+        txns = self._aggTxns()
         qty = txns.pivot(columns=pc.ASSET_CODE, values=pc.TXN_QUANTITY, index=pc.TXN_DATE)
         qty.index.rename(None, inplace=True)
         # todo: only temporarily compute by CF, remove this line later
