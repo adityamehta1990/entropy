@@ -1,4 +1,5 @@
 '''Portfolio class (inherits from CompositeAsset)'''
+from functools import lru_cache
 import numpy as np
 import pandas as pd
 import entropy.asset.constants as ac
@@ -74,6 +75,7 @@ class Portfolio(CompositeAsset):
         exposure = self.holdingsExposure().fillna(method='ffill')
         return (exposure.shift() * self.holdingsReturn()).sum(axis=1).to_frame(name=self.Id)
 
+    @lru_cache()
     def nav(self):
         hAUM = self.holdingsAUM()
         nav = hAUM.fillna(method='ffill').sum(axis=1)
@@ -94,7 +96,3 @@ class Portfolio(CompositeAsset):
 # Asset Class Agg cum pnl 
 # Portfolio cum pnl + hypothetical portfolio benchmark
 # Pie of allocation
-# 
-
-
-

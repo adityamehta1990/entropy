@@ -1,10 +1,11 @@
-import pandas as pd
+'''returns and risk] analysis'''
 import re
+import pandas as pd
 import numpy as np
-import entropy.analytics.constants as ac
+import entropy.analytics.constants as ayc
 
+# todo: rename to returnsAnalysis or equivalent
 # todo: make unexposed functions private
-# todo: ac -> ayc
 
 def windowInDays(window):
     # todo: when window is period ('M'/'A')
@@ -12,16 +13,16 @@ def windowInDays(window):
     if not m:
         raise RuntimeError('Invalid window {}'.format(window))
     periods, freq = m.group(1, 3)
-    return int(ac.DAYS_IN_PERIOD[freq] * float(periods))
+    return int(ayc.DAYS_IN_PERIOD[freq] * float(periods))
 
 def annualizationFactor(df, window):
-    if window == ac.SINCE_INCEPTION:
+    if window == ayc.SINCE_INCEPTION:
         # todo: nullify
         lenWindow = df.expanding().count()
     else:
         # todo: return consistent type
         lenWindow = windowInDays(window)
-    return ac.DAYS_IN_PERIOD[ac.YEAR] / lenWindow
+    return ayc.DAYS_IN_PERIOD[ayc.YEAR] / lenWindow
 
 # return in rolling window
 def _return(df, periods):
@@ -41,18 +42,18 @@ def cumReturn(df, initialVal=0):
     return (1+dailyReturn(df, initialVal=initialVal)).cumprod() - 1
 
 def transform(df, method, window):
-    if method == ac.AGG_ROLLING:
-        if window == ac.SINCE_INCEPTION:
+    if method == ayc.AGG_ROLLING:
+        if window == ayc.SINCE_INCEPTION:
             t = df.expanding()
         else:
             w = windowInDays(window)
             t = df.rolling(w, 1)
-    elif method == ac.AGG_PERIOD:
+    elif method == ayc.AGG_PERIOD:
         # window here is actually period
         t = df.groupby(pd.TimeGrouper(window))
-    elif method == ac.AGG_LAST_PERIOD:
+    elif method == ayc.AGG_LAST_PERIOD:
         t = df.last(window)
-    elif method == ac.AGG_LAST:
+    elif method == ayc.AGG_LAST:
         # todo
         pass
     else:
@@ -60,18 +61,20 @@ def transform(df, method, window):
     return t
 
 def applyFunc(tfm, func, method):
-    if method == ac.AGG_ROLLING:
+    if method == ayc.AGG_ROLLING:
         df = tfm.apply(func)
-    elif method == ac.AGG_PERIOD:
+    elif method == ayc.AGG_PERIOD:
         df = tfm.agg(func)
-    elif method == ac.AGG_LAST_PERIOD:
+    elif method == ayc.AGG_LAST_PERIOD:
         df = tfm.apply(func, raw=True)
     else:
         raise NotImplementedError("Unimplemented method {}".format(method))
     return df
 
 def aggReturn(df, method, window, annualize=False):
-    aggR = applyFunc(transform(1 + df, method, window), ac.METHOD[ac.PROD], method) - 1
+    aggR = applyFunc(transform(1 + df, method, window), ayc.METHOD[ayc.PROD], method) - 1
+    # todo: window based logic is wrong for annualization
+    # what about MTD?
     if annualize:
         aggR = pow(1 + aggR, annualizationFactor(df, window)) - 1
     return aggR

@@ -2,11 +2,10 @@ from abc import ABCMeta
 from abc import abstractmethod
 import pandas as pd
 import six
-from entropy import analytics
+from entropy.analytics import analytics
 from entropy.asset import assetData
 import entropy.asset.constants as ac
 import entropy.utils.timeseries as tsu
-import entropy.analytics.analytics as ay
 import entropy.analytics.constants as ayc
 
 # base class for any type of asset/investment - fund, stock, bond
@@ -49,22 +48,23 @@ class Asset():
         pass
 
     def dailyReturn(self):
-        return ay.dailyReturn(self.nav())
+        return analytics.dailyReturn(self.nav())
 
     # optional: can add total returns for dividends (cashflow)
 
     # YTD, MTD, 1y, 3y, SI etc
     def returnStats(self):
         returns = self.dailyReturn()
-        # stats = [
-        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'M').rename('MTD'),
-        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Q').rename('QTD'),
-        #     ay.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Y').rename('YTD'),
-        #     'SI': analytics.cumReturn(returns),
-        #     '1Y': analytics.periodReturn(returns,'1Y'),
-        #     '3Y': analytics.periodReturn(returns,'3Y'),
-        #     '5Y': analytics.periodReturn(returns,'5Y')
-        # ]
+        stats = {
+            'MTD': analytics.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'M').iloc[0],
+            'QTD': analytics.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'Q').iloc[0],
+            'YTD': analytics.aggReturn(returns, ayc.AGG_LAST_PERIOD, 'A').iloc[0],
+            #'SI': analytics.cumReturn(returns),
+            #'1Y': analytics.periodReturn(returns,'1Y'),
+            #'3Y': analytics.periodReturn(returns,'3Y'),
+            #'5Y': analytics.periodReturn(returns,'5Y')
+        }
+        return stats
 
     def rollingReturn(self, window='1D'):
-        return ay.aggReturn(self.dailyReturn(), ayc.AGG_ROLLING, window, annualize=True)
+        return analytics.aggReturn(self.dailyReturn(), ayc.AGG_ROLLING, window, annualize=True)

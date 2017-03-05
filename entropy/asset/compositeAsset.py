@@ -1,9 +1,10 @@
+'''Composite assets are assets which can hold other assets
+These include funds, benchmarks and portfolios
+'''
 from abc import ABCMeta
-from abc import abstractmethod
-import pandas as pd
+from functools import lru_cache
 import six
 from entropy.asset.asset import Asset
-import entropy.asset.assetData as assetData
 
 # base class for investments/assets which are a set of assets themselves
 # such as portfolio, fund, and benchmarks
@@ -23,7 +24,8 @@ class CompositeAsset(Asset):
     # @abstractmethod
     def holdingsIds(self):
         pass
-    
+
+    @lru_cache()
     def holdingsNav(self):
         return self._navFromIds(self.holdingsIds())
 
