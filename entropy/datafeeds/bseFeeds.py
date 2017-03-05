@@ -111,8 +111,9 @@ def updateDailyStockPrices(client):
     return ack
 
 # todo: centralize error handling
-def updateHistStockPrices(client, startDate=dtu.dateParser('20060401'), verbose=False):
-    dt = datetime.datetime.today() - datetime.timedelta(days=2)
+def updateHistStockPrices(client, startDate=dtu.dateParser('20060401'), verbose=False, redo=False):
+    filledDts = assetData.availableValueDates(client)
+    dt = datetime.datetime.today() - datetime.timedelta(days=2) if redo else min(filledDts)
     missing = []
     while dt >= startDate:
         # try catch due to holidays - remove after implementing holiday calendar

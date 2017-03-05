@@ -83,8 +83,9 @@ def updateDailyBenchmarkPrices(client):
         ack = False
     return ack
 
-def updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20060401'), verbose=False):
-    dt = datetime.datetime.today() - datetime.timedelta(days=2)
+def updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20060401'), verbose=False, redo=False):
+    filledDts = assetData.availableValueDates(client)
+    dt = datetime.datetime.today() - datetime.timedelta(days=2) if redo else min(filledDts)
     missing = []
     while dt >= startDate:
         try:

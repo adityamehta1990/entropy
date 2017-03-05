@@ -1,5 +1,6 @@
 import re
 import datetime
+from entropy.asset import assetData
 from entropy.fund import fundData
 import entropy.fund.constants as fc
 import entropy.utils.webio as webio
@@ -79,10 +80,9 @@ def updateDailyFundNAV(client):
 
 # this is a one time thing
 # amfi has data from 1st Apr 2006
-def updateHistFundNAV(client, startDate=dtu.dateParser('20060401'), verbose=False):
-    # todo: check min updated date and use that
-    # this will just refill everything
-    dt = datetime.datetime.today() - datetime.timedelta(days=2)
+def updateHistFundNAV(client, startDate=dtu.dateParser('20060401'), verbose=False, redo=False):
+    filledDts = assetData.availableValueDates(client)
+    dt = datetime.datetime.today() - datetime.timedelta(days=2) if redo else min(filledDts)
     missing = []
     while dt >= startDate:
         try:
