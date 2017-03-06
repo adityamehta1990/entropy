@@ -10,13 +10,31 @@ import entropy.asset.constants as ac
 import entropy.fund.constants as fc
 
 CAMS_TXN_COLS = ['MF_NAME', 'INVESTOR_NAME', 'PAN', 'FOLIO_NUMBER', 'PRODUCT_CODE', 'SCHEME_NAME',\
-        'TRADE_DATE', 'TRANSACTION_TYPE', 'DIVIDEND_RATE' 'AMOUNT', 'UNITS', 'PRICE', 'BROKER']
+        'TRADE_DATE', 'TRANSACTION_TYPE', 'DIVIDEND_RATE', 'AMOUNT', 'UNITS', 'PRICE', 'BROKER']
 
+KARVY_TXN_COLS = ['FundName', 'Investor Name', 'Account Number', 'Product Code',\
+    'Scheme Description', 'Transaction Date', 'Transaction Description', 'Amount',\
+    'Units', 'NAV', 'Broker Code', 'Broker Name', 'SchemeISIN']
+
+KARVY_CAMS_COL_MAP = {
+    'FundName': 'MF_NAME',
+    'Scheme Description': 'SCHEME_NAME',
+    'Transaction Date': 'TRADE_DATE',
+    'Transaction Description': 'TRANSACTION_TYPE',
+    'Amount': 'AMOUNT',
+    'Units': 'UNITS',
+    'NAV': 'PRICE'
+}
+
+# CAMS has some registration related transactions :/
+# KARVY is missing dividends :/
 FILTER_OUT_TXN_TYPES = [
     'address updated from kra',
     'registration of nominee',
     'registered'
 ]
+
+# unused as of now
 TXN_TYPES = ['purchase', 'dividend reinvested', 'dividend paid out', 'switch in', 'switch out',\
         'redemption', 'address', 'registered']
 
@@ -27,11 +45,16 @@ def importFundTransactionsFromFile(client, portfolioId, fileName):
         df = pd.read_csv(fileName)
     else:
         raise RuntimeError('Unknown file type')
+    if df.columns == KARVY_TXN_COLS:
+        df.rename(columns=KARVY_CAMS_COL_MAP)
+    elif df.columns != CAMS_TXN_COLS:
+        raise Exception('Cannot parse uploaded transaction file')
     for col in df.columns:
         if df[col].dtype == object:
             df[col] = df[col].str.strip()
     # get valid txns
-    txns = df[df.apply(lambda x: not match.matchAnyIdentifier(x.TRANSACTION_TYPE, FILTER_OUT_TXN_TYPES), axis=1)]
+    txns = df[df.apply(lambda x: not match.matchAnyIdentifier(x.TRANSACTION_TYPE,\
+            FILTER_OUT_TXN_TYPES), axis=1)]
     funds = fundData.fundList(client)
     txnsToAdd = []
     failedTxns = []
