@@ -83,11 +83,10 @@ def updateDailyBenchmarkPrices(client):
         ack = False
     return ack
 
-def updateHistBenchmarkPrices(client, startDate=dtu.dateParser('20060401'), verbose=False, redo=False):
-    filledDts = assetData.availableValueDates(client)
-    dt = datetime.datetime.today() - datetime.timedelta(days=2) if redo else min(filledDts)
+def updateHistBenchmarkPrices(client, minDate=dtu.dateParser('20060401'), maxDate=None, verbose=False):
+    dt = maxDate if maxDate else datetime.datetime.today() - datetime.timedelta(days=2)
     missing = []
-    while dt >= startDate:
+    while dt >= minDate:
         try:
             valueMap = bmLevelsFromNSE(dt)
             ack = updateBMVals(client, dt, valueMap)

@@ -80,11 +80,10 @@ def updateDailyFundNAV(client):
 
 # this is a one time thing
 # amfi has data from 1st Apr 2006
-def updateHistFundNAV(client, startDate=dtu.dateParser('20060401'), verbose=False, redo=False):
-    filledDts = assetData.availableValueDates(client)
-    dt = datetime.datetime.today() - datetime.timedelta(days=2) if redo else min(filledDts)
+def updateHistFundNAV(client, minDate=dtu.dateParser('20060401'), maxDate=None, verbose=False):
+    dt = maxDate if maxDate else datetime.datetime.today() - datetime.timedelta(days=2)
     missing = []
-    while dt >= startDate:
+    while dt >= minDate:
         try:
             valueMap = fundNAVFromAMFI(dt)
             ack = fundData.updateFundNAVOnDate(client, dt, valueMap)
