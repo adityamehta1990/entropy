@@ -45,9 +45,9 @@ def importFundTransactionsFromFile(client, portfolioId, fileName):
         df = pd.read_csv(fileName)
     else:
         raise RuntimeError('Unknown file type')
-    if df.columns == KARVY_TXN_COLS:
-        df.rename(columns=KARVY_CAMS_COL_MAP)
-    elif df.columns != CAMS_TXN_COLS:
+    if list(df.columns) == KARVY_TXN_COLS:
+        df = df.rename(columns=KARVY_CAMS_COL_MAP)
+    elif list(df.columns) != CAMS_TXN_COLS:
         raise Exception('Cannot parse uploaded transaction file')
     for col in df.columns:
         if df[col].dtype == object:
@@ -60,26 +60,31 @@ def importFundTransactionsFromFile(client, portfolioId, fileName):
     failedTxns = []
     # grouping because there can be many transactions per fund
     for (key, txnGrp) in txns.groupby(['MF_NAME', 'SCHEME_NAME']):
-        isCloseEnded = any([x.lower().find('nfo') > -1 for x in set(txns.TRANSACTION_TYPE)])
-        txnInfo = {
-            fc.FUND_NAME_AMFI: fundData.fundNameProcessor(key[1]),
-            fc.FUND_HOUSE: key[0],
-            fc.FUND_TYPE: 'close ended schemes' if isCloseEnded else 'open ended schemes'
-        }
-        txnInfo = fundData.enrichFundInfo(txnInfo)
-        try:
-            fund = match.matchDictBest(txnInfo, funds, ac.ASSET_NAME, scorer=fuzz.token_sort_ratio)
-            # fall back to token set if token sort doesnt work
-            if not fund:
-                fund = match.matchDictBest(txnInfo, funds, ac.ASSET_NAME, scorer=fuzz.token_set_ratio)
-            fundId = str(fund[dbclient.MONGO_ID])
-            # the txn ID is dummy here, gets correctly calced in addManyTransactions
-            for txn in txnGrp.itertuples():
-                txnsToAdd.append(portfolioData.newTransaction(0, fundId, fund[ac.ASSET_NAME],\
-                    txn.AMOUNT, txn.UNITS, dtu.parse(txn.TRADE_DATE), txn.TRANSACTION_TYPE))
-            print('processed {}'.format(txnInfo[ac.ASSET_NAME]))
-        except Exception:
-            failedTxns = failedTxns + txnGrp.to_dict('records')
+        fundISIN = txnGrp.iloc[0].get('SchemeISIN')
+        if fundISIN:
+            fund = [f for f in funds if f[fc.ISIN] == fundISIN][0]
+        else:
+            try:
+                isCloseEnded = any([x.lower().find('nfo') > -1 for x in set(txns.TRANSACTION_TYPE)])
+                txnInfo = {
+                    fc.FUND_NAME_AMFI: fundData.fundNameProcessor(key[1]),
+                    fc.FUND_HOUSE: key[0],
+                    fc.FUND_TYPE: 'close ended schemes' if isCloseEnded else 'open ended schemes'
+                }
+                txnInfo = fundData.enrichFundInfo(txnInfo)
+                fund = match.matchDictBest(txnInfo, funds, ac.ASSET_NAME, scorer=fuzz.token_sort_ratio)
+                # fall back to token set if token sort doesnt work
+                if not fund:
+                    fund = match.matchDictBest(txnInfo, funds, ac.ASSET_NAME, scorer=fuzz.token_set_ratio)
+            except Exception:
+                failedTxns = failedTxns + txnGrp.to_dict('records')
+                continue
+        fundId = str(fund[dbclient.MONGO_ID])
+        # the txn ID is dummy here, gets correctly calced in addManyTransactions
+        for txn in txnGrp.itertuples():
+            txnsToAdd.append(portfolioData.newTransaction(0, fundId, fund[ac.ASSET_NAME],\
+                txn.AMOUNT, txn.UNITS, dtu.parse(txn.TRADE_DATE), txn.TRANSACTION_TYPE))
+        print('processed {}'.format(fund[ac.ASSET_NAME]))
     ack = portfolioData.addManyTransactions(client, portfolioId, txnsToAdd)
     if not ack:
         print('Failed to store transactions in db')
