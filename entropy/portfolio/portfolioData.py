@@ -1,11 +1,12 @@
+'''Funtions to get/create portfolios and transactions
+'''
 import hashlib
 import datetime
 import entropy.portfolio.constants as pc
 from entropy.portfolio.portfolio import Portfolio
 import entropy.utils.dateandtime as dtu
-import entropy.utils.timeseries as tsu
 
-def clientPortfolios(client, clientName):
+def getClientPortfolio(client, clientName):
     portCols = dict([(key, 1) for key in [pc.PORTFOLIO_ID, pc.PORTFOLIO_NAME, pc.DATE_CREATED]])
     data = client.portfolioData({pc.CLIENT_NAME : clientName}, portCols)
     if data.count() > 1:

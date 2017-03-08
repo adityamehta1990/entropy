@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.json_encoder = webio.customJSONEncoder # centralized formatter for dates
 CORS(app, origins='*') # make this restrict to same host but any port
 app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 @app.before_request
 def log_request_info():

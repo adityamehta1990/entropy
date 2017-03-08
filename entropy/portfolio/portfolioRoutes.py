@@ -1,17 +1,20 @@
+'''Routes for portfolio data'''
 from flask import Blueprint
 from flask import request
+from werkzeug.utils import secure_filename
 from entropy.db import dbclient
 import entropy.utils.dateandtime as dtu
 import entropy.utils.webio as webio
 from entropy.portfolio import portfolioData
 from entropy.portfolio.portfolio import Portfolio
+import entropy.portfolio.constants as pc
 
 portfolio_api = Blueprint('portfolio_api', __name__)
 client = dbclient.MClient()
 
 @portfolio_api.route('/client/<clientName>')
-def getClientPortfolios(clientName):
-    return webio.json(portfolioData.clientPortfolios(client, clientName))
+def getClientPortfolio(clientName):
+    return webio.json(portfolioData.getClientPortfolio(client, clientName))
 
 @portfolio_api.route('/<portfolioId>')
 def getPortfolio(portfolioId):
@@ -19,8 +22,8 @@ def getPortfolio(portfolioId):
 
 @portfolio_api.route('/new', methods=['POST'])
 def addPortfolio():
-    clientName = request[portfolioData.CLIENT_NAME].strip()
-    portfolioName = request[portfolioData.PORTFOLIO_NAME].strip()
+    clientName = request[pc.CLIENT_NAME].strip()
+    portfolioName = request[pc.PORTFOLIO_NAME].strip()
     ack = portfolioData.addPortfolio(client, clientName, portfolioName)
     return webio.json(ack)
 
@@ -28,12 +31,35 @@ def addPortfolio():
 def getPortfolioTransactions(portfolioId):
     return webio.json(Portfolio(portfolioId, client).transactions())
 
+ALLOWED_EXTENSIONS = set(['csv', 'xls'])
+def allowedFile(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@portfolio_api.route('/<portfolioId>/transactions/upload', methods=['POST'])
+def uploadTransactions(portfolioId):
+    print(request.form['file'])
+    # flask docs say that file should be in request.files
+    # as per http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
+    if 'file' not in request.form:
+        raise RuntimeError('No file part')
+    file = request.form['file']
+    if file.filename == '':
+        raise RuntimeError('No selected file')
+    if file and allowedFile(file.filename):
+        filename = secure_filename(file.filename)
+        print(filename)
+        return webio.json(True)
+    return webio.json(False)
+
 @portfolio_api.route('/<portfolioId>/transaction/new', methods=['POST'])
 def addTransaction(portfolioId):
     data = request.get_json()
-    ack = portfolioData.addTransaction(client, portfolioId, data[portfolioData.ASSET_CODE],
-        data[portfolioData.ASSET_NAME], data[portfolioData.TXN_CASHFLOW],
-        data[portfolioData.TXN_QUANTITY], dtu.dateParser(data[portfolioData.TXN_DATE]))
+    ack = portfolioData.addTransaction(
+        client, portfolioId, data[pc.ASSET_CODE],
+        data[pc.ASSET_NAME], data[portfolioData.TXN_CASHFLOW],
+        data[pc.TXN_QUANTITY], dtu.dateParser(data[pc.TXN_DATE]),
+        data.get(pc.TXN_TYPE))
     return webio.json(ack)
 
 @portfolio_api.route('/<portfolioId>/transaction/<transactionId>', methods=['DELETE'])
