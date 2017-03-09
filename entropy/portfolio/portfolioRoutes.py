@@ -1,12 +1,12 @@
 '''Routes for portfolio data'''
 from flask import Blueprint
 from flask import request
-from werkzeug.utils import secure_filename
 from entropy.db import dbclient
 import entropy.utils.dateandtime as dtu
 import entropy.utils.webio as webio
 from entropy.portfolio import portfolioData
 from entropy.portfolio.portfolio import Portfolio
+from entropy.portfolio import txnUpload
 import entropy.portfolio.constants as pc
 
 portfolio_api = Blueprint('portfolio_api', __name__)
@@ -38,19 +38,15 @@ def allowedFile(filename):
 
 @portfolio_api.route('/<portfolioId>/transactions/upload', methods=['POST'])
 def uploadTransactions(portfolioId):
-    print(request.form['file'])
-    # flask docs say that file should be in request.files
-    # as per http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
-    if 'file' not in request.form:
+    if 'file' not in request.files:
         raise RuntimeError('No file part')
-    file = request.form['file']
+    file = request.files['file']
     if file.filename == '':
         raise RuntimeError('No selected file')
     if file and allowedFile(file.filename):
-        filename = secure_filename(file.filename)
-        print(filename)
-        return webio.json(True)
-    return webio.json(False)
+        failed = txnUpload.importFundTransactionsFromFile(client, portfolioId, file)
+        return webio.json(failed)
+    return webio.json([])
 
 @portfolio_api.route('/<portfolioId>/transaction/new', methods=['POST'])
 def addTransaction(portfolioId):

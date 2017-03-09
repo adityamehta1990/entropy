@@ -38,11 +38,12 @@ FILTER_OUT_TXN_TYPES = [
 TXN_TYPES = ['purchase', 'dividend reinvested', 'dividend paid out', 'switch in', 'switch out',\
         'redemption', 'address', 'registered']
 
-def importFundTransactionsFromFile(client, portfolioId, fileName):
+def importFundTransactionsFromFile(client, portfolioId, file):
+    fileName = file if isinstance(file, str) else file.filename
     if fileName.endswith('xls'):
-        df = pd.read_excel(fileName)
+        df = pd.read_excel(file)
     elif fileName.endswith('csv'):
-        df = pd.read_csv(fileName)
+        df = pd.read_csv(file)
     else:
         raise RuntimeError('Unknown file type')
     if list(df.columns) == KARVY_TXN_COLS:
