@@ -14,23 +14,19 @@ class Portfolio(CompositeAsset):
     Implements nav, holdings
     '''
     def portfolioData(self):
-        data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id}, {pc.TRANSACTIONS : 0})
-        if data.count() == 1:
-            P = data[0]
-        else:
-            P = {}
-        return P
+        data = self.client.portfolioData({pc.PORTFOLIO_ID: self.Id}, {pc.TRANSACTIONS: 0})
+        if data.count() != 1:
+            raise RuntimeError('Could not find portfolio data for id: {}'.format(self.Id))
+        return data[0]
 
     def isSavedAsset(self):
         return False
 
     def transactions(self):
-        data = self.client.portfolioData({pc.PORTFOLIO_ID : self.Id})
-        if data.count() == 1:
-            ts = data[0][pc.TRANSACTIONS]
-        else:
-            ts = []
-        return ts
+        data = self.client.portfolioData({pc.PORTFOLIO_ID: self.Id}, {pc.TRANSACTIONS: 1})
+        if data.count() != 1:
+            raise RuntimeError('Could not find portfolio transactions for id: {}'.format(self.Id))
+        return data[0][pc.TRANSACTIONS]
 
     # there can be multiple transactions in same fund on same date
     # this leads to duplicate entries while creating index from txn date
@@ -43,7 +39,13 @@ class Portfolio(CompositeAsset):
         return list(set([txn[pc.ASSET_CODE] for txn in self.transactions()]))
 
     def holdings(self):
-        return assetData.assetInfo(self.client, self.holdingsIds(), keys=ac.ASSET_ATTRIBUTES)
+        df = pd.DataFrame(assetData.assetInfo(self.client, self.holdingsIds(), keys=ac.ASSET_ATTRIBUTES))
+        df = df.rename(columns={ac.ASSET_ID: pc.ASSET_CODE}).set_index(pc.ASSET_CODE)
+        # todo: separate this in a different fn where we can also get aggregate CFs, qty, etc
+        # and not just latest exposure
+        wts = self.holdingsExposure().iloc[-1]
+        wts.name = pc.HOLDINGS_EXPOSURE
+        return df.join(wts)
 
     def holdingsCF(self):
         txns = self._aggTxns()

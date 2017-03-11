@@ -16,3 +16,8 @@ TXN_QUANTITY = "quantity"
 TXN_PRICE = "price"
 TXN_DATE = "txnDate"
 TXN_TYPE = "txnType"
+
+# holdings column names
+HOLDINGS_CF = 'cashflow'
+HOLDINGS_QTY = 'quantity'
+HOLDINGS_EXPOSURE = 'exposure'

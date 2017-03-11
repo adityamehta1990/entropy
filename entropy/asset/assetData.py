@@ -23,6 +23,9 @@ def assetInfo(client, Ids, keys=ac.ASSET_ATTRIBUTES):
     data = [d for d in client.assetMetaData({dbclient.MONGO_ID: {"$in": Ids}}, projection)]
     if len(data) != len(Ids):
         raise RuntimeError("Could not find meta data for provided Ids")
+    # this is dumb but necessary
+    for d in data:
+        d[dbclient.MONGO_ID] = str(d[dbclient.MONGO_ID])
     return data
 
 # can be called by any asset after performing custom checks on updatedInfo
