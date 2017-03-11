@@ -3,6 +3,7 @@ import io
 import zipfile
 import requests
 from flask import jsonify
+from flask import request
 from flask.json import JSONEncoder
 from bson.objectid import ObjectId
 import pandas as pd
@@ -14,7 +15,9 @@ DATES_KEY = "dates"
 
 # all http responses will be of the form {data : <>}
 JSON_KEY = "data"
-JSON_ERROR_KEY = "error`"
+JSON_ERROR_KEY = "error"
+
+ALLOWED_EXTENSIONS = set(['csv', 'xls'])
 
 def json(data):
     return jsonify({JSON_KEY : data})
@@ -22,12 +25,25 @@ def json(data):
 def err(e):
     return jsonify({JSON_ERROR_KEY: str(e)})
 
+# we have 2 different ways of converting to list of dicts
+# based on convenience of manipulating timeseries dataframes vs general dataframes
+
 def ts2dict(df):
+    '''convert dataframe whose index is datetime series
+    to {dates: df.index, col1: [...], col2: [...], etc}
+    '''
     # Alternative:
-    # return {DATES_KEY: list(df.index), VALUES_KEY: df.to_index('list')}
+    # return {DATES_KEY: list(df.index), VALUES_KEY: df.to_dict('list')}
     dct = df.to_dict('list')
     dct[DATES_KEY] = list(df.index)
     return dct
+
+def df2dict(df):
+    '''convert dataframe whose index is an object other than date
+    to [{col1: [...], col2: [...]}]
+    '''
+    df = df.reset_index()
+    return df.to_dict('records')
 
 # use this for _nav? Or just get rid of it.
 def dict2ts(dct):
@@ -53,6 +69,20 @@ def fileContentFromUrl(url, params={}):
 def unzippedFileFromUrl(url, params={}):
     filename = fileContentFromUrl(url, params)
     return zipfile.ZipFile(filename)
+
+def allowedFile(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def getUploadedFile():
+    if 'file' not in request.files:
+        raise RuntimeError('No file part')
+    file = request.files['file']
+    if file.filename == '':
+        raise RuntimeError('No selected file')
+    if file and allowedFile(file.filename):
+        return file
+    raise RuntimeError('Selected file is invalid')
 
 # set this on the flask.json_encoder to encode dates in isoformat
 class customJSONEncoder(JSONEncoder):

@@ -31,22 +31,11 @@ def addPortfolio():
 def getPortfolioTransactions(portfolioId):
     return webio.json(Portfolio(portfolioId, client).transactions())
 
-ALLOWED_EXTENSIONS = set(['csv', 'xls'])
-def allowedFile(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @portfolio_api.route('/<portfolioId>/transactions/upload', methods=['POST'])
 def uploadTransactions(portfolioId):
-    if 'file' not in request.files:
-        raise RuntimeError('No file part')
-    file = request.files['file']
-    if file.filename == '':
-        raise RuntimeError('No selected file')
-    if file and allowedFile(file.filename):
-        failed = txnUpload.importFundTransactionsFromFile(client, portfolioId, file)
-        return webio.json(failed)
-    return webio.json([])
+    file = webio.getUploadedFile()
+    failed = txnUpload.importFundTransactionsFromFile(client, portfolioId, file)
+    return webio.json(failed)
 
 @portfolio_api.route('/<portfolioId>/transaction/new', methods=['POST'])
 def addTransaction(portfolioId):
@@ -64,6 +53,10 @@ def removeTransaction(portfolioId, transactionId):
     if request.method == 'DELETE':
         ack = portfolioData.removeTransaction(client, portfolioId, int(transactionId))
         return webio.json(ack)
+
+@portfolio_api.route('/<portfolioId>/holdings')
+def portfolioHoldings(portfolioId):
+    return webio.json(webio.df2dict(Portfolio(portfolioId, client).holdings()))
 
 @portfolio_api.route('/<portfolioId>/nav')
 def portfolioNav(portfolioId):
