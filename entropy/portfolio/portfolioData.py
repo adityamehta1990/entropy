@@ -31,10 +31,11 @@ def newPortfolio(Id, clientName, portfolioName):
 
 def addPortfolio(client, clientName, portfolioName):
     Id = getPortfolioId(clientName, portfolioName)
-    data = client.portfolioData({pc.PORTFOLIO_ID : Id})
+    data = client.portfolioData({pc.CLIENT_NAME : clientName})
     if data.count() > 0:
         raise RuntimeError('Portfolio {} for {} already exists'.format(portfolioName, clientName))
-    return client.addPortfolio(newPortfolio(Id, clientName, portfolioName))
+    ack = client.addPortfolio(newPortfolio(Id, clientName, portfolioName))
+    return Id if ack else None
 
 def newTransactionId(transactions):
     if len(transactions) > 0:

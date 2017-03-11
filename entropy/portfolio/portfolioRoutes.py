@@ -17,15 +17,15 @@ def getClientPortfolio(clientName):
     return webio.json(portfolioData.getClientPortfolio(client, clientName))
 
 @portfolio_api.route('/<portfolioId>')
-def getPortfolio(portfolioId):
+def getPortfolioData(portfolioId):
     return webio.json(Portfolio(portfolioId, client).portfolioData())
 
 @portfolio_api.route('/new', methods=['POST'])
 def addPortfolio():
     clientName = request[pc.CLIENT_NAME].strip()
     portfolioName = request[pc.PORTFOLIO_NAME].strip()
-    ack = portfolioData.addPortfolio(client, clientName, portfolioName)
-    return webio.json(ack)
+    portfolioId = portfolioData.addPortfolio(client, clientName, portfolioName)
+    return webio.json(portfolioId)
 
 @portfolio_api.route('/<portfolioId>/transactions')
 def getPortfolioTransactions(portfolioId):
