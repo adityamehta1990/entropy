@@ -1,3 +1,7 @@
+Python based portfolio analysis module for Indian mutual fund investments.
+
+Built using Flask + MongoDB and pandas (obviously). Built as proof of concept, no longer maintained.
+
 With a mongod instance, run
     > python server.py
 in the commandline. 
